@@ -1,0 +1,108 @@
+@import 'tailwindcss';
+
+/* ------------------------------------------------------------------
+   Silkroad Angels — design tokens
+   Values transcribed from "Silkroad Angels Brand Guideline. 2025"
+   §4.1 Brand color / §4.2 Colors value / §3.3 Font hierarchy
+   ------------------------------------------------------------------ */
+
+@theme {
+  /* §4.2 — the four brand colors, at their documented weights */
+  --color-turquoise: #08ccc3; /* Primary   60% */
+  --color-oxford: #00203f; /* Secondary 20% */
+  --color-snow: #f4f7f2; /* Neutral   15% */
+  --color-cyan: #00f7eb; /* Accent     5% */
+
+  /* Text tints derived from Oxford Blue — never new hues. Ratios are against
+     Snow Drift, since that is the only ground they appear on. */
+  --color-ink: #00203f; /* 15.20:1 */
+  --color-ink-70: #4a6379; /*  5.80:1 */
+  /* 4.60:1 — carries 13px labels, so it has to clear AA. A lighter tint looks
+     better and fails; legibility wins. */
+  --color-ink-45: #5f7284;
+  --color-rule: #dbe2dc;
+
+  /* §3.1 — Atyp Display (display) + Inter (body).
+     Atyp Display is a licensed face; General Sans is the closest
+     metric-compatible stand-in until the licence is dropped in. */
+  --font-display: 'Atyp Display', 'General Sans', 'Inter', sans-serif;
+  --font-sans: 'Inter', system-ui, sans-serif;
+
+  /* §3.3 — font hierarchy, verbatim. All line-height 120%. */
+  --text-h1: 6rem;
+  --text-h1--line-height: 1.2;
+  --text-h2: 3.5rem;
+  --text-h2--line-height: 1.2;
+  --text-h3: 3rem;
+  --text-h3--line-height: 1.2;
+  --text-h4: 2.5rem;
+  --text-h4--line-height: 1.2;
+  --text-h5: 2rem;
+  --text-h5--line-height: 1.2;
+  --text-h6: 1.5rem;
+  --text-h6--line-height: 1.2;
+
+  --ease-brand: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+:root {
+  color-scheme: light;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  background: var(--color-snow);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-weight: 400;
+  overflow-x: hidden;
+}
+
+/* §3.2 — display weights: Medium 500 / Semi-Bold 600 / Bold 700 for headings.
+   Light 300 / Regular 400 for body. */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.022em;
+}
+
+::selection {
+  background: var(--color-cyan);
+  color: var(--color-oxford);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Focus ring — cyan is the accent reserved for "key information and CTAs" (§4.2) */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-turquoise);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* The deck sets body copy in a generous measure — hold it there. */
+@utility measure {
+  max-width: 34rem;
+}

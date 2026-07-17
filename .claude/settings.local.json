@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Users/user/AppData/Local/Temp/claude/C--Users-user-Saved-Games-Desktop-silkroad/c14b5287-50f5-4041-a50a-ef96d476b792/scratchpad/**)",
+      "Bash(python -c ' *)",
+      "Bash(pip install *)",
+      "PowerShell(python -m pip install pdfplumber pypdf pymupdf 2>&1)",
+      "Bash(python mklogo.py)",
+      "Bash(npm -v)",
+      "Bash(npm create *)",
+      "Bash(npm install *)",
+      "Bash(npx tsc *)",
+      "Bash(npm run *)",
+      "Bash(git --version)",
+      "Bash(gh --version)",
+      "Bash(gh auth *)",
+      "Bash(git init *)",
+      "Bash(git add *)",
+      "Bash(git -c user.name=\"sulaakula08\" -c user.email=\"sulaakula2008@gmail.com\" commit -q -m \"first commit\")",
+      "Bash(git branch *)",
+      "Bash(git remote *)"
+    ]
+  }
+}

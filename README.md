@@ -1,0 +1,113 @@
+# Silkroad Angels
+
+Website redesign. Both investors and founders apply through one intake that
+routes them to a named track, a named reviewer and a stated turnaround — shown
+on screen the moment they submit.
+
+```bash
+npm install
+npm run dev      # http://localhost:5173
+npm run build
+```
+
+React 18 · Vite 6 · Tailwind 4 · Framer Motion 11 · React Router 6.
+
+## Where things are
+
+| Path | What it is |
+| --- | --- |
+| `src/apply/routing.ts` | **The routing rules.** Ordered, first match wins. |
+| `src/apply/schema.ts` | The questions, per path. |
+| `src/apply/Apply.tsx` | The wizard: steps, validation, review. |
+| `src/apply/Outcome.tsx` | The result screen. |
+| `src/components/Halftone.tsx` | The icon (§2.4), rebuilt from measured geometry. |
+| `src/components/Logo.tsx` | The horizontal lockup (§2.2), extracted outlines. |
+| `src/index.css` | Brand tokens. |
+
+## Smart routing
+
+The intake branches twice: once on **path**, then on the answers within it.
+
+**Investors** route on accreditation → experience → cheque size:
+
+| Condition | Track |
+| --- | --- |
+| Not accredited, or unsure | Angel Academy |
+| Accredited, no experience *or* $5–25k | Syndicate — Observer |
+| Accredited, $50k+ | Core Membership |
+| Otherwise | Syndicate — Member |
+
+**Founders** route on stage → revenue → incorporation:
+
+| Condition | Track |
+| --- | --- |
+| Idea stage | Too early — for now |
+| Seed/A + revenue + US-incorporated | Fast track |
+| Revenue, not US-incorporated | Corridor Review |
+| Otherwise | Standard review |
+
+Questions also hide themselves when they cannot apply — cheque size is never
+asked of someone heading to the Academy, metrics are never asked of an
+idea-stage company. That logic is `isFieldVisible`, in the same file.
+
+Rules live apart from the components on purpose: the investment team should be
+able to read and change who goes where without touching React.
+
+### Tracks are published up front
+
+The `Tracks` section on the homepage mirrors these outcomes deliberately —
+someone should be able to predict where they will land before they type
+anything. **If you change a rule in `routing.ts`, change the copy in
+`src/sections/Tracks.tsx` to match.**
+
+## Brand
+
+Everything is transcribed from *Silkroad Angels Brand Guideline. 2025* — the
+section numbers in code comments (§2.4, §3.3, §4.2) point back to it.
+
+**Colours** (§4.2) — Turquoise `#08CCC3` (60%), Oxford Blue `#00203F` (20%),
+Snow Drift `#F4F7F2` (15%), Fluorescent Cyan `#00F7EB` (5%).
+
+Two constraints the guideline implies but does not state, both found by
+measuring contrast:
+
+- **Turquoise is 1.86:1 on Snow Drift.** It cannot carry text on a light
+  ground — on light it appears as a dot, a rule or a fill, and Oxford does the
+  reading. On Oxford it is 8.16:1 and used freely.
+- **Cyan is reserved for dark grounds** (§2.6). The mark is cyan on Oxford,
+  turquoise on Snow Drift; the nav swaps them as it crosses sections.
+
+All text meets WCAG AA. `--color-ink-45` is set to the lightest tint that still
+clears 4.5:1, because it carries 13px labels.
+
+**Type** (§3.1) — Inter for body, as the guideline specifies.
+
+> **Atyp Display is not licensed in this repo.** It is the specified display
+> face; [General Sans](https://fontshare.com/fonts/general-sans) stands in for
+> it — a near metric match. Drop in the licensed files and the
+> `--font-display` stack in `src/index.css` picks Atyp up first with no other
+> changes.
+
+**Assets** — the logo and icon were extracted from the guideline PDF's vector
+artwork rather than redrawn:
+
+- `Logo.tsx` holds the real outlines. The `ANGELS` half is `currentColor` and
+  the mark reads `--logo-mark`, so one file serves both colourways.
+- `Halftone.tsx` is the icon rebuilt from its measured 10×10 grid — every dot
+  radius and opacity is taken from the source, so it renders the mark exactly
+  while staying animatable. It is the same geometry in the hero, the outcome
+  screen and the favicon.
+
+## Notes
+
+- Motion runs on one curve (`cubic-bezier(0.16, 1, 0.3, 1)`) and respects
+  `prefers-reduced-motion` throughout.
+- **The form does not submit anywhere.** `Apply.tsx` computes the track and
+  renders it; wire `routeApplication`'s result to your backend at the
+  `setDone(true)` call. The reference number is derived from the answers and is
+  display-only — issue a real one server-side.
+- Copy is placeholder where it states facts we cannot verify — the hero
+  metrics ($41M, 112 angels, 64 companies, 9 countries), fees, SLAs and the
+  Academy cohort details all need confirming before launch.
+
+# SilkRoad
