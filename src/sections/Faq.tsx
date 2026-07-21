@@ -49,7 +49,7 @@ export function Faq() {
               <p className="mt-5 max-w-sm text-[15.5px] leading-relaxed text-ink-70">
                 If yours isn’t here,{' '}
                 <a
-                  href="mailto:hello@silkroadangels.com"
+                  href="mailto:buildunicorns@silkroadinnovationhub.com"
                   className="text-oxford underline decoration-turquoise decoration-2 underline-offset-4 transition-[text-decoration-color] hover:decoration-oxford"
                 >
                   write to us

@@ -24,8 +24,8 @@ const COLS = [
   {
     h: 'Contact',
     links: [
-      ['hello@silkroadangels.com', 'mailto:hello@silkroadangels.com'],
-      ['LinkedIn', 'https://linkedin.com'],
+      ['buildunicorns@silkroadinnovationhub.com', 'mailto:buildunicorns@silkroadinnovationhub.com'],
+      ['Telegram', 'https://t.me/arabjanov'],
     ],
   },
 ]
@@ -107,7 +107,7 @@ export function Footer() {
         </div>
 
         <div className="mt-16 flex flex-col gap-4 border-t border-white/10 pt-8 text-[13px] text-snow/50 sm:flex-row sm:items-center sm:justify-between">
-          <p>© {new Date().getFullYear()} Silkroad Angels. Almaty · Palo Alto.</p>
+          <p>© {new Date().getFullYear()} Silkroad Innovation Hub. Palo Alto, California.</p>
           <p className="max-w-xl leading-relaxed">
             Nothing here is an offer to sell securities. Private investments are
             illiquid and you can lose everything you put in.

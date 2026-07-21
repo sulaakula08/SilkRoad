@@ -149,7 +149,7 @@ export const INVESTOR_STEPS: Step[] = [
       },
       {
         id: 'motivation',
-        label: 'Why Silkroad Angels, specifically?',
+        label: 'Why Silkroad Innovation Hub, specifically?',
         hint: 'Plain language is fine. We read every one of these.',
         type: 'textarea',
         placeholder:

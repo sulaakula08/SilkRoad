@@ -5,7 +5,7 @@ const VALUES = [
   ['Integrity', 'We write down why we passed, and we send it.'],
   ['Innovation', 'The pipeline is Valley-grade or it does not go out.'],
   ['Empowerment', 'Nobody writes a first cheque here without knowing why.'],
-  ['Community', '112 angels who take each other’s calls.'],
+  ['Community', 'A network that takes each other’s calls.'],
   ['Global mindset', 'Two markets, one set of standards.'],
 ]
 
@@ -35,7 +35,7 @@ export function Corridor() {
                 and someone on the other end who picks up.
               </p>
               <p>
-                Silkroad Angels is that route. We curate the deals, we run the
+                The Silkroad Innovation Hub is that route. We curate the deals, we run the
                 education, and we stay with our members through the whole
                 investment — not just the wire.
               </p>

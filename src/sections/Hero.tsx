@@ -108,10 +108,10 @@ export function Hero() {
       <div className="relative border-t border-white/10">
         <dl className="mx-auto grid max-w-7xl grid-cols-2 divide-x divide-white/10 px-6 sm:px-8 lg:grid-cols-4">
           {[
-            ['$41M', 'deployed since 2021'],
-            ['112', 'angels in the network'],
-            ['64', 'Valley companies backed'],
-            ['9', 'countries in the corridor'],
+            ['285+', 'startups accelerated'],
+            ['167+', 'investors trained'],
+            ['19+', 'startups backed'],
+            ['263+', 'events held'],
           ].map(([n, l], i) => (
             <motion.div
               key={l}

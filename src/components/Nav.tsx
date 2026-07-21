@@ -40,7 +40,7 @@ export function Nav() {
         style={{ borderBottomWidth: 1, backdropFilter: stuck ? 'blur(12px)' : 'none' }}
       >
         <nav className="mx-auto flex h-[72px] max-w-7xl items-center justify-between gap-8 px-6 sm:px-8">
-          <Link to="/" aria-label="Silkroad Angels — home" className="shrink-0">
+          <Link to="/" aria-label="Silkroad Innovation Hub — home" className="shrink-0">
             {/* §2.6: cyan mark on Oxford Blue, turquoise on Snow Drift. */}
             <Logo
               className={`h-7 w-auto transition-colors duration-300 ${
