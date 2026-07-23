@@ -9,6 +9,7 @@ import { Faq } from './sections/Faq'
 import { Footer } from './sections/Footer'
 import { Apply } from './apply/Apply'
 import { NavThemeProvider } from './components/navTheme'
+import { ChatWidget } from './chat/ChatWidget'
 
 function Home() {
   return (
@@ -54,6 +55,7 @@ export default function App() {
           <Route path="*" element={<Home />} />
         </Routes>
       </main>
+      <ChatWidget />
     </NavThemeProvider>
   )
 }

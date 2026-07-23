@@ -18,7 +18,10 @@
       "Bash(git add *)",
       "Bash(git -c user.name=\"sulaakula08\" -c user.email=\"sulaakula2008@gmail.com\" commit -q -m \"first commit\")",
       "Bash(git branch *)",
-      "Bash(git remote *)"
+      "Bash(git remote *)",
+      "Bash(git push *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git check-ignore *)"
     ]
   }
 }

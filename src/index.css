@@ -82,6 +82,13 @@ h6 {
   color: var(--color-oxford);
 }
 
+/* Tailwind v4's reset leaves enabled buttons at cursor:default — restore the
+   pointer so anything clickable feels clickable. */
+button:not(:disabled),
+[role='button']:not([aria-disabled='true']) {
+  cursor: pointer;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;

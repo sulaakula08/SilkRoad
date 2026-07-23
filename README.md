@@ -110,4 +110,52 @@ artwork rather than redrawn:
   metrics ($41M, 112 angels, 64 companies, 9 countries), fees, SLAs and the
   Academy cohort details all need confirming before launch.
 
+## Assistant (AI chatbot)
+
+A floating assistant (bottom-right, every page) consults visitors, answers FAQs
+from the site's own facts, and routes serious inquiries to the intake or the
+team. Powered by Google Gemini.
+
+### Setup
+
+```bash
+cp .env.example .env.local
+# put your key in .env.local — get one at https://aistudio.google.com/apikey
+npm run dev
+```
+
+The key **must** be an AI Studio API key (it starts with `AIza`). It is read
+only by the server-side proxy and is never sent to the browser.
+
+### How it's wired (and why)
+
+The site is a static bundle, so a key in client code would ship to every
+visitor. Instead:
+
+| Piece | Role |
+| --- | --- |
+| `api/chat.js` | Server-side proxy. Holds the key, calls Gemini, streams the reply back as SSE. Runs as a Vercel Node function in prod, and as Vite middleware in dev (`vite.config.ts`) — same file both ways. |
+| `src/chat/knowledge.ts` | The system prompt — everything the bot may state as fact, transcribed from the site. **Keep it in sync with the sections and `routing.ts`.** |
+| `src/chat/useChat.ts` | Client hook: posts the transcript, reads the SSE stream token by token. |
+| `src/chat/ChatWidget.tsx` | The launcher + panel. |
+| `src/chat/AssistantText.tsx` | Renders replies as React nodes (no `innerHTML`), linkifies URLs/emails and routes `/apply` links in-app. |
+
+**The key is never committed** — `.gitignore` blocks `.env*` (except
+`.env.example`), and the build is checked to contain no key.
+
+### Guardrails
+
+The bot is instructed to give no personalised financial/legal advice, invent no
+fees/metrics/deals, promise no acceptances, and hand off to `/apply` or the team
+(`buildunicorns@silkroadinnovationhub.com`, Telegram) for anything real. The
+panel also shows persistent **Invest / Raise / Telegram / Email** actions, so
+routing works even if a visitor never types.
+
+### Deploy
+
+`vercel.json` rewrites all non-`/api` routes to `index.html` (SPA) and lets
+Vercel serve `api/chat.js` as a function. Set `GEMINI_API_KEY` in the host's
+environment — never in the repo. Any host with Node serverless functions works;
+the proxy is a plain `(req, res)` handler.
+
 # SilkRoad

@@ -3,3 +3,9 @@ dist
 *.local
 .DS_Store
 .vite
+.vercel
+
+# Secrets — never commit. .env.example (no secret) is the exception.
+.env
+.env.*
+!.env.example
