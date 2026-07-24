@@ -4,13 +4,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { Logo } from './Logo'
 import { ArrowUpRight } from './ui'
 import { useNavTheme } from './navTheme'
-
-const LINKS = [
-  { href: '/#corridor', label: 'The corridor' },
-  { href: '/#tracks', label: 'Tracks' },
-  { href: '/#process', label: 'How it works' },
-  { href: '/#faq', label: 'FAQ' },
-]
+import { LangToggle, useI18n } from '../i18n'
 
 export function Nav() {
   const [stuck, setStuck] = useState(false)
@@ -18,6 +12,14 @@ export function Nav() {
   const { scrollY } = useScroll()
   const { pathname } = useLocation()
   const { overDark } = useNavTheme()
+  const { t } = useI18n()
+
+  const links = [
+    { href: '/#calendar', label: t.nav.calendar },
+    { href: '/#blog', label: t.nav.blog },
+    { href: '/#footer', label: t.nav.contacts },
+    { href: '/#faq', label: t.nav.faq },
+  ]
 
   /** Transparent over a dark section => invert the nav's contents. */
   const inverted = overDark && !stuck
@@ -39,9 +41,8 @@ export function Nav() {
         transition={{ duration: 0.3 }}
         style={{ borderBottomWidth: 1, backdropFilter: stuck ? 'blur(12px)' : 'none' }}
       >
-        <nav className="mx-auto flex h-[72px] max-w-7xl items-center justify-between gap-8 px-6 sm:px-8">
-          <Link to="/" aria-label="Silkroad Innovation Hub — home" className="shrink-0">
-            {/* §2.6: cyan mark on Oxford Blue, turquoise on Snow Drift. */}
+        <nav className="mx-auto flex h-[72px] max-w-7xl items-center justify-between gap-6 px-6 sm:px-8">
+          <Link to="/" aria-label="Silkroad Angels Club — home" className="flex shrink-0 items-center gap-2.5">
             <Logo
               className={`h-7 w-auto transition-colors duration-300 ${
                 inverted ? 'text-snow' : 'text-oxford'
@@ -54,10 +55,17 @@ export function Nav() {
                 } as React.CSSProperties
               }
             />
+            <span
+              className={`hidden font-display text-[13px] font-semibold tracking-[0.02em] transition-colors duration-300 sm:inline ${
+                inverted ? 'text-snow/60' : 'text-ink-45'
+              }`}
+            >
+              Club
+            </span>
           </Link>
 
-          <div className="hidden items-center gap-9 md:flex">
-            {LINKS.map((l) => (
+          <div className="hidden items-center gap-8 lg:flex">
+            {links.map((l) => (
               <a
                 key={l.href}
                 href={l.href}
@@ -72,21 +80,25 @@ export function Nav() {
             ))}
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
+            <div className="hidden sm:block">
+              <LangToggle tone={inverted ? 'dark' : 'light'} />
+            </div>
+
             <Link
-              to="/apply"
+              to="/apply/investor"
               className={`group hidden rounded-full px-5 py-2.5 font-display text-[14.5px] font-semibold transition-colors duration-300 sm:inline-flex sm:items-center sm:gap-2 ${
                 inverted
                   ? 'bg-turquoise text-oxford hover:bg-cyan'
                   : 'bg-oxford text-snow hover:bg-turquoise hover:text-oxford'
               }`}
             >
-              Apply <ArrowUpRight />
+              {t.nav.apply} <ArrowUpRight />
             </Link>
 
             <button
               onClick={() => setOpen((o) => !o)}
-              className={`grid size-10 place-items-center md:hidden ${
+              className={`grid size-10 place-items-center lg:hidden ${
                 inverted && !open ? 'text-snow' : 'text-oxford'
               }`}
               aria-label={open ? 'Close menu' : 'Open menu'}
@@ -116,10 +128,10 @@ export function Nav() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.25 }}
-            className="fixed inset-0 z-40 bg-snow pt-[72px] md:hidden"
+            className="fixed inset-0 z-40 bg-snow pt-[72px] lg:hidden"
           >
             <div className="flex flex-col px-6 pt-8">
-              {LINKS.map((l, i) => (
+              {links.map((l, i) => (
                 <motion.a
                   key={l.href}
                   href={l.href}
@@ -135,13 +147,16 @@ export function Nav() {
               <motion.div
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3, duration: 0.4 }}
+                transition={{ delay: 0.28, duration: 0.4 }}
+                className="mt-8 flex items-center justify-between"
               >
+                <LangToggle />
                 <Link
-                  to="/apply"
-                  className="mt-8 flex items-center justify-center gap-2 rounded-full bg-oxford px-6 py-4 font-display text-[16px] font-semibold text-snow"
+                  to="/apply/investor"
+                  onClick={() => setOpen(false)}
+                  className="flex items-center justify-center gap-2 rounded-full bg-oxford px-6 py-3.5 font-display text-[15px] font-semibold text-snow"
                 >
-                  Apply <ArrowUpRight />
+                  {t.nav.apply} <ArrowUpRight />
                 </Link>
               </motion.div>
             </div>

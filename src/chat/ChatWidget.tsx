@@ -2,19 +2,57 @@ import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { useChat } from './useChat'
-import { GREETING, SUGGESTIONS, TEAM_EMAIL, TEAM_TELEGRAM } from './knowledge'
+import { GREETING, SUGGESTIONS, CONTACT } from './knowledge'
 import { Halftone } from '../components/Halftone'
 import { AssistantText } from './AssistantText'
+import { useI18n } from '../i18n'
 
 const EASE = [0.16, 1, 0.3, 1] as const
 
+/** Widget chrome copy, per language. */
+const UI = {
+  ru: {
+    title: 'Silkroad Angels',
+    status: 'Ассистент · отвечает сразу',
+    clear: 'Очистить',
+    ready: 'Готовы?',
+    invest: 'Инвестировать',
+    raise: 'Привлечь инвестиции',
+    apply: 'Заявка',
+    email: 'Написать',
+    placeholder: 'Спросите о клубе…',
+    disclaimer: 'ИИ-ассистент — может ошибаться. Не является инвест-советом.',
+    aria: 'Ассистент Silkroad Angels',
+    ask: 'Спросить',
+    close: 'Закрыть',
+  },
+  en: {
+    title: 'Silkroad Angels',
+    status: 'Assistant · usually instant',
+    clear: 'Clear',
+    ready: 'Ready?',
+    invest: 'Invest',
+    raise: 'Raise',
+    apply: 'Apply',
+    email: 'Email',
+    placeholder: 'Ask anything about the club…',
+    disclaimer: 'AI assistant — it can be wrong. Not investment advice.',
+    aria: 'Silkroad Angels assistant',
+    ask: 'Ask the network',
+    close: 'Close',
+  },
+} as const
+
 export function ChatWidget() {
   const [open, setOpen] = useState(false)
-  const [hovers, setHovers] = useState(0)
   const { messages, streaming, error, send, reset } = useChat()
   const [draft, setDraft] = useState('')
   const still = useReducedMotion()
   const navigate = useNavigate()
+  const { lang } = useI18n()
+  const greeting = GREETING[lang]
+  const suggestions = SUGGESTIONS[lang]
+  const ui = UI[lang]
 
   const scrollRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
@@ -59,8 +97,7 @@ export function ChatWidget() {
           reveals a label; a breathing ring signals it's interactive. */}
       <motion.button
         onClick={() => setOpen((o) => !o)}
-        onMouseEnter={() => setHovers((h) => h + 1)}
-        aria-label={open ? 'Close the assistant' : 'Open the assistant'}
+        aria-label={open ? ui.close : ui.ask}
         aria-expanded={open}
         initial={still ? false : { scale: 0, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
@@ -82,7 +119,7 @@ export function ChatWidget() {
 
         {/* label — grows leftward on hover (desktop only) */}
         <span className="hidden max-w-0 overflow-hidden font-display text-[14px] font-semibold whitespace-nowrap opacity-0 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:max-w-[9rem] group-hover:pr-1 group-hover:pl-3 group-hover:opacity-100 sm:inline">
-          {open ? 'Close' : 'Ask the network'}
+          {open ? ui.close : ui.ask}
         </span>
 
         {/* icon disc */}
@@ -112,13 +149,9 @@ export function ChatWidget() {
                 exit={{ scale: 0.6, opacity: 0 }}
                 transition={{ duration: 0.2 }}
               >
-                {/* re-key on hover so the halftone arrow re-resolves */}
-                <Halftone
-                  key={hovers}
-                  className="size-6"
-                  color="var(--color-cyan)"
-                  animate={!still}
-                />
+                {/* Static: the whileInView reveal never fired reliably inside a
+                    fixed-position button, leaving the dots at opacity 0. */}
+                <Halftone className="size-6" color="var(--color-cyan)" animate={false} />
               </motion.span>
             )}
           </AnimatePresence>
@@ -142,7 +175,7 @@ export function ChatWidget() {
 
             <motion.div
               role="dialog"
-              aria-label="Silkroad Angels assistant"
+              aria-label={ui.aria}
               initial={still ? { opacity: 0 } : { opacity: 0, y: 24, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={still ? { opacity: 0 } : { opacity: 0, y: 16, scale: 0.98 }}
@@ -162,10 +195,10 @@ export function ChatWidget() {
                       <Halftone className="size-5" color="var(--color-cyan)" animate={false} />
                     </span>
                     <div>
-                      <p className="font-display text-[15px] font-semibold">Silkroad Angels</p>
+                      <p className="font-display text-[15px] font-semibold">{ui.title}</p>
                       <p className="flex items-center gap-1.5 text-[12px] text-snow/60">
                         <span className="size-1.5 rounded-full bg-turquoise" />
-                        Assistant · usually instant
+                        {ui.status}
                       </p>
                     </div>
                   </div>
@@ -174,7 +207,7 @@ export function ChatWidget() {
                       onClick={reset}
                       className="rounded-full px-2.5 py-1 text-[12px] text-snow/60 transition-colors hover:bg-white/10 hover:text-snow"
                     >
-                      Clear
+                      {ui.clear}
                     </button>
                   )}
                 </div>
@@ -188,7 +221,7 @@ export function ChatWidget() {
               >
                 {/* Greeting */}
                 <Bubble role="assistant">
-                  <AssistantText text={GREETING} />
+                  <AssistantText text={greeting} />
                 </Bubble>
 
                 {messages.map((m) => (
@@ -212,7 +245,7 @@ export function ChatWidget() {
 
                 {empty && (
                   <div className="space-y-2 pt-1">
-                    {SUGGESTIONS.map((s) => (
+                    {suggestions.map((s) => (
                       <button
                         key={s}
                         onClick={() => submit(s)}
@@ -225,35 +258,44 @@ export function ChatWidget() {
                 )}
               </div>
 
-              {/* Routing rail */}
-              <div className="flex items-center gap-2 border-t border-rule px-4 py-2.5">
-                <span className="text-[12px] text-ink-45">Ready?</span>
+              {/* Routing rail — apply + reach a human */}
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 border-t border-rule px-4 py-2.5">
                 <button
                   onClick={() => goApply('investor')}
                   className="rounded-full bg-oxford/5 px-3 py-1.5 text-[12.5px] font-medium text-oxford transition-colors hover:bg-turquoise hover:text-oxford"
                 >
-                  Invest
+                  {ui.invest}
                 </button>
                 <button
                   onClick={() => goApply('founder')}
                   className="rounded-full bg-oxford/5 px-3 py-1.5 text-[12.5px] font-medium text-oxford transition-colors hover:bg-turquoise hover:text-oxford"
                 >
-                  Raise
+                  {ui.raise}
                 </button>
-                <a
-                  href={TEAM_TELEGRAM}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="ml-auto text-[12.5px] text-ink-45 underline underline-offset-2 transition-colors hover:text-oxford"
-                >
-                  Telegram
-                </a>
-                <a
-                  href={`mailto:${TEAM_EMAIL}`}
-                  className="text-[12.5px] text-ink-45 underline underline-offset-2 transition-colors hover:text-oxford"
-                >
-                  Email
-                </a>
+                <span className="ml-auto flex items-center gap-3">
+                  <a
+                    href={CONTACT.whatsapp}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[12.5px] text-ink-45 underline underline-offset-2 transition-colors hover:text-oxford"
+                  >
+                    WhatsApp
+                  </a>
+                  <a
+                    href={CONTACT.telegram}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[12.5px] text-ink-45 underline underline-offset-2 transition-colors hover:text-oxford"
+                  >
+                    Telegram
+                  </a>
+                  <a
+                    href={`mailto:${CONTACT.email}`}
+                    className="text-[12.5px] text-ink-45 underline underline-offset-2 transition-colors hover:text-oxford"
+                  >
+                    {ui.email}
+                  </a>
+                </span>
               </div>
 
               {/* Composer */}
@@ -270,7 +312,7 @@ export function ChatWidget() {
                       }
                     }}
                     rows={1}
-                    placeholder="Ask anything about the network…"
+                    placeholder={ui.placeholder}
                     className="max-h-28 flex-1 resize-none bg-transparent py-1 text-[14.5px] text-ink outline-none placeholder:text-ink-45/70"
                   />
                   <button
@@ -284,9 +326,7 @@ export function ChatWidget() {
                     </svg>
                   </button>
                 </div>
-                <p className="mt-1.5 px-1 text-[11px] text-ink-45">
-                  AI assistant — it can be wrong. Not investment advice.
-                </p>
+                <p className="mt-1.5 px-1 text-[11px] text-ink-45">{ui.disclaimer}</p>
               </form>
             </motion.div>
           </>

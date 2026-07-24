@@ -1,8 +1,30 @@
-# Silkroad Angels
+# Silkroad Angels Club
 
-Website redesign. Both investors and founders apply through one intake that
-routes them to a named track, a named reviewer and a stated turnaround — shown
-on screen the moment they submit.
+Marketing site for the Silkroad Angels Club — a private angel-investor club at
+the Silkroad Innovation Hub. Fully bilingual (RU default / EN), with an AI
+assistant and a multi-step application flow.
+
+**Bilingual:** all homepage copy lives in [src/content.ts](src/content.ts) as
+`CONTENT.ru` / `CONTENT.en` (identical shapes). The `en / ru` toggle and the
+`useI18n()` hook are in [src/i18n.tsx](src/i18n.tsx); the choice persists in
+`localStorage`. To edit copy, edit `content.ts` — nothing else.
+
+**Homepage sections** (in `src/sections/`): Hero → Value → Advantages → Club →
+Ecosystem → Team → Portfolio → Process → Faq → Footer. Team photos and
+portfolio/fund logos are neutral placeholders (monograms / "Logotype" tiles) —
+drop in real assets in `Team.tsx` and `Portfolio.tsx`. Social links are `#`.
+
+**Known follow-up:** the application flow under `/apply` is still English-only —
+translating the form schema (`src/apply/schema.ts`) into `content.ts` is the
+next i18n step.
+
+---
+
+## The application flow
+
+Investors and founders apply through one intake that routes them to a named
+track, a named reviewer and a stated turnaround — shown on screen the moment
+they submit. The homepage CTAs point to `/apply/investor`.
 
 ```bash
 npm install
@@ -53,12 +75,8 @@ idea-stage company. That logic is `isFieldVisible`, in the same file.
 Rules live apart from the components on purpose: the investment team should be
 able to read and change who goes where without touching React.
 
-### Tracks are published up front
-
-The `Tracks` section on the homepage mirrors these outcomes deliberately —
-someone should be able to predict where they will land before they type
-anything. **If you change a rule in `routing.ts`, change the copy in
-`src/sections/Tracks.tsx` to match.**
+The routing rules and questions live in `src/apply/` and are independent of the
+homepage marketing copy in `src/content.ts`.
 
 ## Brand
 

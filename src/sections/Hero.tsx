@@ -4,19 +4,23 @@ import { Halftone } from '../components/Halftone'
 import { DotField } from '../components/DotField'
 import { ArrowUpRight } from '../components/ui'
 import { useDarkNav } from '../components/navTheme'
+import { useI18n } from '../i18n'
 
 const line = {
-  hidden: { opacity: 0, y: '0.4em' },
+  hidden: { opacity: 0, y: '0.45em' },
   show: (i: number) => ({
     opacity: 1,
     y: 0,
-    transition: { duration: 0.9, delay: 0.1 + i * 0.09, ease: [0.16, 1, 0.3, 1] },
+    transition: { duration: 0.9, delay: 0.14 + i * 0.1, ease: [0.16, 1, 0.3, 1] },
   }),
 }
 
 export function Hero() {
   const still = useReducedMotion()
+  const { t } = useI18n()
   useDarkNav()
+
+  const titleLines = t.hero.title.split('\n')
 
   return (
     <section className="relative overflow-hidden bg-oxford text-snow">
@@ -31,18 +35,21 @@ export function Hero() {
       <div className="relative mx-auto max-w-7xl px-6 pt-36 pb-20 sm:px-8 sm:pt-44 sm:pb-28">
         <div className="grid gap-16 lg:grid-cols-[1.35fr_0.65fr] lg:items-center">
           <div>
+            {/* backed-by badge (replaces the old city list) */}
             <motion.p
               initial={still ? false : { opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.8 }}
-              className="flex items-center gap-3 font-display text-[13px] tracking-[0.16em] text-turquoise uppercase"
+              className="inline-flex items-center gap-2.5 rounded-full border border-white/15 bg-white/5 py-1.5 pr-4 pl-2 font-display text-[13px] font-medium text-snow/80"
             >
-              <span className="size-1.5 rounded-full bg-turquoise" />
-              Almaty · Tashkent · Baku · Palo Alto
+              <span className="grid size-5 place-items-center rounded-full bg-turquoise/15">
+                <span className="size-1.5 rounded-full bg-turquoise" />
+              </span>
+              {t.hero.badge}
             </motion.p>
 
-            <h1 className="mt-7 font-display text-[3rem] leading-[1.04] font-semibold tracking-[-0.03em] text-balance sm:text-[4.5rem] lg:text-[5.25rem]">
-              {['Central Eurasia', 'backs the Valley.'].map((l, i) => (
+            <h1 className="mt-7 font-display text-[2.6rem] leading-[1.05] font-semibold tracking-[-0.03em] text-balance sm:text-[4rem] lg:text-[4.6rem]">
+              {titleLines.map((l, i) => (
                 <motion.span
                   key={l}
                   custom={i}
@@ -51,7 +58,9 @@ export function Hero() {
                   animate="show"
                   className="block overflow-hidden"
                 >
-                  <span className={i === 1 ? 'text-turquoise' : undefined}>{l}</span>
+                  <span className={i === titleLines.length - 1 ? 'text-turquoise' : undefined}>
+                    {l}
+                  </span>
                 </motion.span>
               ))}
             </h1>
@@ -59,43 +68,31 @@ export function Hero() {
             <motion.p
               initial={still ? false : { opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.42, ease: [0.16, 1, 0.3, 1] }}
-              className="mt-8 max-w-xl text-[17px] leading-relaxed text-snow/70 sm:text-[18px]"
+              transition={{ duration: 0.8, delay: 0.46, ease: [0.16, 1, 0.3, 1] }}
+              className="mt-7 max-w-lg text-[17px] leading-relaxed text-snow/70 sm:text-[18px]"
             >
-              We give investors from Almaty to Baku a way into Silicon Valley
-              rounds that have already been screened — and we give founders in
-              the corridor a way to the capital. One network, running in both
-              directions.
+              {t.hero.subtitle}
             </motion.p>
 
             <motion.div
               initial={still ? false : { opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.52, ease: [0.16, 1, 0.3, 1] }}
-              className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center"
+              transition={{ duration: 0.8, delay: 0.56, ease: [0.16, 1, 0.3, 1] }}
+              className="mt-10 flex flex-wrap items-center gap-4"
             >
               <Link
                 to="/apply/investor"
-                className="group inline-flex items-center justify-center gap-2.5 rounded-full bg-turquoise px-7 py-4 font-display text-[15.5px] font-semibold text-oxford transition-colors duration-200 hover:bg-cyan"
+                className="group inline-flex items-center justify-center gap-2.5 rounded-full bg-turquoise px-8 py-4 font-display text-[15.5px] font-semibold text-oxford transition-colors duration-200 hover:bg-cyan"
               >
-                I want to invest <ArrowUpRight />
+                {t.hero.cta} <ArrowUpRight />
               </Link>
-              <Link
-                to="/apply/founder"
-                className="group inline-flex items-center justify-center gap-2.5 rounded-full border border-white/20 px-7 py-4 font-display text-[15.5px] font-semibold text-snow transition-colors duration-200 hover:border-snow hover:bg-snow hover:text-oxford"
+              <a
+                href="#club"
+                className="font-display text-[15px] font-medium text-snow/70 transition-colors hover:text-snow"
               >
-                I’m raising <ArrowUpRight />
-              </Link>
+                {t.hero.scroll} ↓
+              </a>
             </motion.div>
-
-            <motion.p
-              initial={still ? false : { opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.8, delay: 0.7 }}
-              className="mt-6 text-[13.5px] text-snow/50"
-            >
-              Three minutes. No account, no call booked, no “we’ll be in touch”.
-            </motion.p>
           </div>
 
           <div className="hidden lg:block">
@@ -104,27 +101,22 @@ export function Hero() {
         </div>
       </div>
 
-      {/* Ticker of hard numbers — grounded, not decorative. */}
+      {/* Stats band */}
       <div className="relative border-t border-white/10">
         <dl className="mx-auto grid max-w-7xl grid-cols-2 divide-x divide-white/10 px-6 sm:px-8 lg:grid-cols-4">
-          {[
-            ['285+', 'startups accelerated'],
-            ['167+', 'investors trained'],
-            ['19+', 'startups backed'],
-            ['263+', 'events held'],
-          ].map(([n, l], i) => (
+          {t.stats.map((s, i) => (
             <motion.div
-              key={l}
+              key={s.label}
               initial={still ? false : { opacity: 0, y: 12 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: i * 0.07, ease: [0.16, 1, 0.3, 1] }}
               className="px-2 py-8 first:pl-0 sm:px-6 sm:py-10"
             >
-              <dt className="font-display text-[2rem] font-semibold text-snow tabular-nums sm:text-[2.5rem]">
-                {n}
+              <dt className="font-display text-[2.25rem] font-semibold text-turquoise tabular-nums sm:text-[2.75rem]">
+                {s.n}
               </dt>
-              <dd className="mt-1 text-[13.5px] text-snow/50">{l}</dd>
+              <dd className="mt-1 text-[13.5px] text-snow/55">{s.label}</dd>
             </motion.div>
           ))}
         </dl>
