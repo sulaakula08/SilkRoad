@@ -146,12 +146,15 @@ export type Dict = {
     stage: string
     ticket: string
     deck: string
+    description: string
+    descriptionHint: string
     message: string
     optional: string
     select: string
     ticketOptions: string[]
     stageOptions: string[]
     submit: string
+    analyzing: string
     successTitle: string
     successBody: string
     again: string
@@ -335,12 +338,15 @@ export const CONTENT: Record<'ru' | 'en', Dict> = {
       stage: 'Стадия',
       ticket: 'Размер чека',
       deck: 'Ссылка на питч-дек',
+      description: 'Что вы строите?',
+      descriptionHint: 'Продукт, тяга, почему сейчас — пару предложений. Заявку сразу оценит ИИ.',
       message: 'Коротко о себе',
       optional: 'необязательно',
       select: 'Выберите',
       ticketOptions: ['$10k – $25k', '$25k – $50k', '$50k – $100k', '$100k+'],
       stageOptions: ['Идея / прототип', 'Pre-seed', 'Seed', 'Series A'],
       submit: 'Отправить заявку',
+      analyzing: 'ИИ анализирует вашу заявку…',
       successTitle: 'Заявка отправлена',
       successBody:
         'Спасибо! Мы свяжемся с вами по указанным контактам в течение 3 рабочих дней.',
@@ -511,12 +517,15 @@ export const CONTENT: Record<'ru' | 'en', Dict> = {
       stage: 'Stage',
       ticket: 'Cheque size',
       deck: 'Pitch deck link',
+      description: 'What are you building?',
+      descriptionHint: 'Product, traction, why now — a few sentences. Our AI reviews it instantly.',
       message: 'A little about you',
       optional: 'optional',
       select: 'Select',
       ticketOptions: ['$10k – $25k', '$25k – $50k', '$50k – $100k', '$100k+'],
       stageOptions: ['Idea / prototype', 'Pre-seed', 'Seed', 'Series A'],
       submit: 'Send application',
+      analyzing: 'Our AI is reviewing your application…',
       successTitle: 'Application sent',
       successBody:
         'Thank you! We’ll get back to you at the contacts you provided within 3 business days.',

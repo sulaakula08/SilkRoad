@@ -8,17 +8,21 @@ import tailwindcss from '@tailwindcss/vite'
  * .env.local into process.env here (server side) — it is never exposed to the
  * client, because it is not prefixed VITE_ and only this Node code reads it.
  */
-function chatApi(env: Record<string, string>): PluginOption {
-  // Make the server-side vars visible to the handler via process.env.
+function serverApi(env: Record<string, string>): PluginOption {
+  // Make the server-side vars visible to the handlers via process.env.
   process.env.GEMINI_API_KEY ||= env.GEMINI_API_KEY || ''
   process.env.GEMINI_MODEL ||= env.GEMINI_MODEL || ''
 
   return {
-    name: 'silkroad-chat-api',
+    name: 'silkroad-server-api',
     configureServer(server) {
       server.middlewares.use('/api/chat', async (req, res) => {
         const { chatHandler } = await server.ssrLoadModule('/api/chat.js')
         await chatHandler(req, res)
+      })
+      server.middlewares.use('/api/screen', async (req, res) => {
+        const { screenHandler } = await server.ssrLoadModule('/api/screen.js')
+        await screenHandler(req, res)
       })
     },
   }
@@ -28,6 +32,6 @@ export default defineConfig(({ mode }) => {
   // '' prefix => load ALL vars (not just VITE_), for the server middleware.
   const env = loadEnv(mode, process.cwd(), '')
   return {
-    plugins: [react(), tailwindcss(), chatApi(env)],
+    plugins: [react(), tailwindcss(), serverApi(env)],
   }
 })

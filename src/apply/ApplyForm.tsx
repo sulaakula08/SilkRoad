@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { useI18n } from '../i18n'
 import { ArrowUpRight } from '../components/ui'
+import { ScreeningResult, type Screening } from './ScreeningResult'
 
 export type Tab = 'investor' | 'founder'
 
@@ -9,21 +10,27 @@ const EASE = [0.16, 1, 0.3, 1] as const
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
 
 type Values = Record<string, string>
+type Phase = 'form' | 'screening' | 'sent'
 
 /**
- * The intake. Two tabs — investor / founder — each with only the basics.
- * Fully bilingual: every label comes from content.ts.
+ * The intake. Two tabs — investor / founder — with only the basics.
  *
- * NOTE: there is no backend. `onSubmit` just shows the confirmation; wire the
- * values to your CRM/endpoint where marked.
+ * Founder submissions are AI-screened: on submit we POST to /api/screen, which
+ * asks Gemini to auto-tag sector + stage, score investability, surface
+ * strengths/flags and match the club's theses. The founder sees the pre-screen
+ * instantly; a partner still reviews every application.
+ *
+ * Investor submissions just confirm. No backend writes yet — wire `values` to
+ * your CRM where marked.
  */
 export function ApplyForm({ initialTab = 'investor' }: { initialTab?: Tab }) {
-  const { t } = useI18n()
+  const { t, lang } = useI18n()
   const a = t.apply
   const [tab, setTab] = useState<Tab>(initialTab)
   const [v, setV] = useState<Values>({})
   const [errors, setErrors] = useState<Values>({})
-  const [sent, setSent] = useState(false)
+  const [phase, setPhase] = useState<Phase>('form')
+  const [screen, setScreen] = useState<Screening | null>(null)
 
   const set = (k: string) => (val: string) => {
     setV((s) => ({ ...s, [k]: val }))
@@ -35,13 +42,19 @@ export function ApplyForm({ initialTab = 'investor' }: { initialTab?: Tab }) {
     setErrors({})
   }
 
-  // required field ids per tab
   const required =
     tab === 'investor'
       ? ['name', 'email', 'phone', 'ticket']
-      : ['name', 'email', 'phone', 'company', 'stage']
+      : ['name', 'email', 'phone', 'company', 'stage', 'description']
 
-  const submit = (e: React.FormEvent) => {
+  const reset = () => {
+    setV({})
+    setErrors({})
+    setScreen(null)
+    setPhase('form')
+  }
+
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault()
     const errs: Values = {}
     for (const id of required) {
@@ -51,122 +64,140 @@ export function ApplyForm({ initialTab = 'investor' }: { initialTab?: Tab }) {
     setErrors(errs)
     if (Object.keys(errs).length) return
 
-    // → send `{ tab, ...v }` to your backend here
-    setSent(true)
-  }
+    // → send `{ tab, ...v }` to your CRM/endpoint here.
 
-  const reset = () => {
-    setV({})
-    setErrors({})
-    setSent(false)
+    if (tab === 'investor') {
+      setPhase('sent')
+      return
+    }
+
+    // Founder: run the AI pre-screen.
+    setPhase('screening')
+    try {
+      const res = await fetch('/api/screen', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          lang,
+          submission: {
+            company: v.company,
+            description: v.description,
+            stage: v.stage,
+            deck: v.deck,
+          },
+        }),
+      })
+      const data = await res.json().catch(() => null)
+      if (res.ok && data?.result) setScreen(data.result as Screening)
+    } catch {
+      /* screening is a bonus — a failure still accepts the application */
+    }
+    setPhase('sent')
   }
 
   return (
     <div className="overflow-hidden rounded-2xl border border-rule bg-white">
-      {/* tabs */}
-      <div className="grid grid-cols-2 border-b border-rule" role="tablist">
-        {(['investor', 'founder'] as Tab[]).map((k) => {
-          const on = tab === k
-          return (
-            <button
-              key={k}
-              role="tab"
-              aria-selected={on}
-              onClick={() => switchTab(k)}
-              className={`relative px-5 py-4 font-display text-[15px] font-semibold transition-colors duration-200 ${
-                on ? 'text-oxford' : 'text-ink-45 hover:text-oxford'
-              }`}
-            >
-              {k === 'investor' ? a.tabInvestor : a.tabFounder}
-              {on && (
-                <motion.span
-                  layoutId="apply-tab"
-                  className="absolute inset-x-0 bottom-0 h-0.5 bg-turquoise"
-                  transition={{ duration: 0.35, ease: EASE }}
-                />
-              )}
-            </button>
-          )
-        })}
-      </div>
+      {/* tabs — hidden once submitted */}
+      {phase === 'form' && (
+        <div className="grid grid-cols-2 border-b border-rule" role="tablist">
+          {(['investor', 'founder'] as Tab[]).map((k) => {
+            const on = tab === k
+            return (
+              <button
+                key={k}
+                role="tab"
+                aria-selected={on}
+                onClick={() => switchTab(k)}
+                className={`relative px-5 py-4 font-display text-[15px] font-semibold transition-colors duration-200 ${
+                  on ? 'text-oxford' : 'text-ink-45 hover:text-oxford'
+                }`}
+              >
+                {k === 'investor' ? a.tabInvestor : a.tabFounder}
+                {on && (
+                  <motion.span
+                    layoutId="apply-tab"
+                    className="absolute inset-x-0 bottom-0 h-0.5 bg-turquoise"
+                    transition={{ duration: 0.35, ease: EASE }}
+                  />
+                )}
+              </button>
+            )
+          })}
+        </div>
+      )}
 
-      {/* No AnimatePresence here on purpose: a keyed exit inside `mode="wait"`
-          could leave the previous tab's form mounted. A keyed remount with an
-          enter-only animation is simpler and always lands on the right fields. */}
-      {sent ? (
-          <motion.div
-            key="sent"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.35, ease: EASE }}
-            className="px-6 py-14 text-center sm:px-10"
-          >
-            <span className="mx-auto grid size-12 place-items-center rounded-full bg-turquoise/15">
-              <svg viewBox="0 0 20 20" className="size-6 text-turquoise" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M4 10.5l4 4 8-8" />
-              </svg>
-            </span>
-            <h3 className="mt-5 font-display text-h5 font-semibold">{a.successTitle}</h3>
-            <p className="mx-auto mt-3 max-w-md text-[15.5px] leading-relaxed text-ink-70">
-              {a.successBody}
-            </p>
-            <button
-              onClick={reset}
-              className="mt-6 font-display text-[14.5px] font-medium text-ink-45 underline underline-offset-4 transition-colors hover:text-oxford"
-            >
-              {a.again}
-            </button>
-          </motion.div>
-        ) : (
-          <motion.form
-            key={tab}
-            onSubmit={submit}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, ease: EASE }}
-            className="grid gap-5 p-6 sm:grid-cols-2 sm:p-8"
-          >
-            <Field id="name" label={a.name} v={v} errors={errors} set={set} />
-            <Field id="email" label={a.email} type="email" v={v} errors={errors} set={set} />
-            <Field id="phone" label={a.phone} placeholder="+7 …" v={v} errors={errors} set={set} />
+      {phase === 'screening' ? (
+        <Analyzing label={a.analyzing} />
+      ) : phase === 'sent' && screen ? (
+        <ScreeningResult data={screen} onReset={reset} resetLabel={a.again} />
+      ) : phase === 'sent' ? (
+        <Sent a={a} onReset={reset} />
+      ) : (
+        <motion.form
+          key={tab}
+          onSubmit={submit}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, ease: EASE }}
+          className="grid gap-5 p-6 sm:grid-cols-2 sm:p-8"
+        >
+          <Field id="name" label={a.name} v={v} errors={errors} set={set} />
+          <Field id="email" label={a.email} type="email" v={v} errors={errors} set={set} />
+          <Field id="phone" label={a.phone} placeholder="+7 …" v={v} errors={errors} set={set} />
 
-            {tab === 'investor' ? (
+          {tab === 'investor' ? (
+            <Select
+              id="ticket"
+              label={a.ticket}
+              options={a.ticketOptions}
+              placeholder={a.select}
+              v={v}
+              errors={errors}
+              set={set}
+            />
+          ) : (
+            <Field id="company" label={a.company} v={v} errors={errors} set={set} />
+          )}
+
+          {tab === 'founder' && (
+            <>
               <Select
-                id="ticket"
-                label={a.ticket}
-                options={a.ticketOptions}
+                id="stage"
+                label={a.stage}
+                options={a.stageOptions}
                 placeholder={a.select}
                 v={v}
                 errors={errors}
                 set={set}
               />
-            ) : (
-              <Field id="company" label={a.company} v={v} errors={errors} set={set} />
-            )}
-
-            {tab === 'founder' && (
-              <>
-                <Select
-                  id="stage"
-                  label={a.stage}
-                  options={a.stageOptions}
-                  placeholder={a.select}
-                  v={v}
-                  errors={errors}
-                  set={set}
+              <Field
+                id="deck"
+                label={a.deck}
+                optional={a.optional}
+                placeholder="https://…"
+                v={v}
+                errors={errors}
+                set={set}
+              />
+              <div className="sm:col-span-2">
+                <Label text={a.description} />
+                <p className="mb-2 text-[13px] text-ink-45">{a.descriptionHint}</p>
+                <textarea
+                  rows={4}
+                  value={v.description ?? ''}
+                  onChange={(e) => set('description')(e.target.value)}
+                  className={`w-full resize-y rounded-xl border bg-white px-4 py-3 text-[15px] text-ink outline-none transition-colors hover:border-ink-45/50 focus:border-turquoise ${
+                    errors.description ? 'border-red-300' : 'border-rule'
+                  }`}
                 />
-                <Field
-                  id="deck"
-                  label={a.deck}
-                  optional={a.optional}
-                  placeholder="https://…"
-                  v={v}
-                  errors={errors}
-                  set={set}
-                />
-              </>
-            )}
+                {errors.description && (
+                  <p className="mt-1.5 text-[13px] text-red-600">{errors.description}</p>
+                )}
+              </div>
+            </>
+          )}
 
+          {tab === 'investor' && (
             <div className="sm:col-span-2">
               <Label text={a.message} optional={a.optional} />
               <textarea
@@ -176,18 +207,60 @@ export function ApplyForm({ initialTab = 'investor' }: { initialTab?: Tab }) {
                 className="w-full resize-y rounded-xl border border-rule bg-white px-4 py-3 text-[15px] text-ink outline-none transition-colors hover:border-ink-45/50 focus:border-turquoise"
               />
             </div>
+          )}
 
-            <div className="sm:col-span-2">
-              <button
-                type="submit"
-                className="group inline-flex w-full items-center justify-center gap-2.5 rounded-full bg-oxford px-7 py-4 font-display text-[15.5px] font-semibold text-snow transition-colors duration-200 hover:bg-turquoise hover:text-oxford sm:w-auto"
-              >
-                {a.submit} <ArrowUpRight />
-              </button>
-            </div>
-          </motion.form>
-        )}
+          <div className="sm:col-span-2">
+            <button
+              type="submit"
+              className="group inline-flex w-full items-center justify-center gap-2.5 rounded-full bg-oxford px-7 py-4 font-display text-[15.5px] font-semibold text-snow transition-colors duration-200 hover:bg-turquoise hover:text-oxford sm:w-auto"
+            >
+              {a.submit} <ArrowUpRight />
+            </button>
+          </div>
+        </motion.form>
+      )}
     </div>
+  )
+}
+
+function Analyzing({ label }: { label: string }) {
+  return (
+    <div className="flex flex-col items-center gap-5 px-6 py-16 text-center">
+      <div className="relative grid size-12 place-items-center">
+        <motion.span
+          className="absolute inset-0 rounded-full border-2 border-turquoise/25 border-t-turquoise"
+          animate={{ rotate: 360 }}
+          transition={{ duration: 0.9, repeat: Infinity, ease: 'linear' }}
+        />
+        <span className="size-2 rounded-full bg-turquoise" />
+      </div>
+      <p className="font-display text-[15.5px] font-medium text-ink-70">{label}</p>
+    </div>
+  )
+}
+
+function Sent({ a, onReset }: { a: ReturnType<typeof useI18n>['t']['apply']; onReset: () => void }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35, ease: EASE }}
+      className="px-6 py-14 text-center sm:px-10"
+    >
+      <span className="mx-auto grid size-12 place-items-center rounded-full bg-turquoise/15">
+        <svg viewBox="0 0 20 20" className="size-6 text-turquoise" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M4 10.5l4 4 8-8" />
+        </svg>
+      </span>
+      <h3 className="mt-5 font-display text-h5 font-semibold">{a.successTitle}</h3>
+      <p className="mx-auto mt-3 max-w-md text-[15.5px] leading-relaxed text-ink-70">{a.successBody}</p>
+      <button
+        onClick={onReset}
+        className="mt-6 font-display text-[14.5px] font-medium text-ink-45 underline underline-offset-4 transition-colors hover:text-oxford"
+      >
+        {a.again}
+      </button>
+    </motion.div>
   )
 }
 
