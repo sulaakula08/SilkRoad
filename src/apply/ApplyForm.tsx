@@ -1,8 +1,13 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import { useI18n } from '../i18n'
 import { ArrowUpRight } from '../components/ui'
 import { ScreeningResult, type Screening } from './ScreeningResult'
+
+// Deck upload accepts PDF/PPTX. The extractor (pdf.js + jszip) is heavy, so it's
+// dynamically imported in pickDeck — it never touches the initial bundle.
+const DECK_ACCEPT =
+  '.pdf,.pptx,application/pdf,application/vnd.openxmlformats-officedocument.presentationml.presentation'
 
 export type Tab = 'investor' | 'founder'
 
@@ -31,10 +36,36 @@ export function ApplyForm({ initialTab = 'investor' }: { initialTab?: Tab }) {
   const [errors, setErrors] = useState<Values>({})
   const [phase, setPhase] = useState<Phase>('form')
   const [screen, setScreen] = useState<Screening | null>(null)
+  const [deckText, setDeckText] = useState('')
+  const [deck, setDeck] = useState<{ name: string; status: 'reading' | 'ready' | 'error'; err?: string } | null>(null)
+  const deckInput = useRef<HTMLInputElement>(null)
 
   const set = (k: string) => (val: string) => {
     setV((s) => ({ ...s, [k]: val }))
     setErrors((e) => (e[k] ? { ...e, [k]: '' } : e))
+  }
+
+  const pickDeck = async (file?: File) => {
+    if (!file) return
+    setDeck({ name: file.name, status: 'reading' })
+    setDeckText('')
+    try {
+      const { extractDeckText } = await import('../lib/deck')
+      const text = await extractDeckText(file)
+      setDeckText(text)
+      setDeck({ name: file.name, status: 'ready' })
+    } catch (e) {
+      const code = e instanceof Error ? e.message : ''
+      const err =
+        code === 'too-big' ? a.deckErrBig : code === 'unsupported' ? a.deckErrUnsupported : a.deckErrEmpty
+      setDeck({ name: file.name, status: 'error', err })
+    }
+  }
+
+  const clearDeck = () => {
+    setDeck(null)
+    setDeckText('')
+    if (deckInput.current) deckInput.current.value = ''
   }
 
   const switchTab = (next: Tab) => {
@@ -52,6 +83,7 @@ export function ApplyForm({ initialTab = 'investor' }: { initialTab?: Tab }) {
     setErrors({})
     setScreen(null)
     setPhase('form')
+    clearDeck()
   }
 
   const submit = async (e: React.FormEvent) => {
@@ -84,6 +116,7 @@ export function ApplyForm({ initialTab = 'investor' }: { initialTab?: Tab }) {
             description: v.description,
             stage: v.stage,
             deck: v.deck,
+            deckText: deckText || undefined,
           },
         }),
       })
@@ -170,15 +203,64 @@ export function ApplyForm({ initialTab = 'investor' }: { initialTab?: Tab }) {
                 errors={errors}
                 set={set}
               />
-              <Field
-                id="deck"
-                label={a.deck}
-                optional={a.optional}
-                placeholder="https://…"
-                v={v}
-                errors={errors}
-                set={set}
-              />
+              <div>
+                <Label text={a.deck} optional={a.optional} />
+                <input
+                  type="text"
+                  value={v.deck ?? ''}
+                  placeholder="https://…"
+                  onChange={(e) => set('deck')(e.target.value)}
+                  className={`${inputCls} border-rule`}
+                />
+
+                {/* …or attach the deck as a file; the AI reads it in-browser. */}
+                <input
+                  ref={deckInput}
+                  type="file"
+                  accept={DECK_ACCEPT}
+                  className="hidden"
+                  onChange={(e) => pickDeck(e.target.files?.[0])}
+                />
+
+                {!deck ? (
+                  <button
+                    type="button"
+                    onClick={() => deckInput.current?.click()}
+                    className="mt-2 inline-flex items-center gap-2 text-[13.5px] font-medium text-ink-45 transition-colors hover:text-oxford"
+                  >
+                    <UploadIcon />
+                    {a.deckUpload}
+                  </button>
+                ) : (
+                  <div className="mt-2 flex items-center gap-2 rounded-lg border border-rule bg-snow px-3 py-2">
+                    {deck.status === 'reading' ? (
+                      <span className="size-3.5 shrink-0 animate-spin rounded-full border-2 border-turquoise/25 border-t-turquoise" />
+                    ) : (
+                      <UploadIcon
+                        className={deck.status === 'error' ? 'text-red-500' : 'text-turquoise'}
+                      />
+                    )}
+                    <span className="min-w-0 flex-1 truncate text-[13.5px] text-ink-70">
+                      {deck.status === 'reading' ? a.deckReading : deck.name}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={clearDeck}
+                      className="shrink-0 text-[13px] font-medium text-ink-45 underline underline-offset-2 transition-colors hover:text-oxford"
+                    >
+                      {a.deckRemove}
+                    </button>
+                  </div>
+                )}
+
+                <p
+                  className={`mt-1.5 text-[12.5px] ${
+                    deck?.status === 'error' ? 'text-red-600' : 'text-ink-45'
+                  }`}
+                >
+                  {deck?.status === 'error' ? deck.err : a.deckHint}
+                </p>
+              </div>
               <div className="sm:col-span-2">
                 <Label text={a.description} />
                 <p className="mb-2 text-[13px] text-ink-45">{a.descriptionHint}</p>
@@ -261,6 +343,22 @@ function Sent({ a, onReset }: { a: ReturnType<typeof useI18n>['t']['apply']; onR
         {a.again}
       </button>
     </motion.div>
+  )
+}
+
+function UploadIcon({ className = '' }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      className={`size-4 shrink-0 ${className}`}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M10 13V4M6.5 7.5 10 4l3.5 3.5M4 14v1.5A1.5 1.5 0 0 0 5.5 17h9a1.5 1.5 0 0 0 1.5-1.5V14" />
+    </svg>
   )
 }
 

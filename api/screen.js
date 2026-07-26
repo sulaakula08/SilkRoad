@@ -111,6 +111,10 @@ export async function screenHandler(req, res) {
     .filter((l) => !l.endsWith(': '))
     .join('\n')
 
+  // Text extracted from an uploaded PDF/PPTX deck, if the founder attached one.
+  const deckText = clean(s.deckText, 12_000).trim()
+  const application = deckText ? `${brief}\n\nDECK CONTENTS (extracted):\n${deckText}` : brief
+
   if (!clean(s.description).trim() && !clean(s.company).trim()) {
     res.statusCode = 400
     return res.end(JSON.stringify({ error: 'Not enough information to screen.' }))
@@ -140,7 +144,7 @@ tight (strengths/flags: max ~12 words each). Return ONLY the JSON object.
 
   const payload = {
     systemInstruction: { parts: [{ text: system }] },
-    contents: [{ role: 'user', parts: [{ text: `APPLICATION\n${brief}` }] }],
+    contents: [{ role: 'user', parts: [{ text: `APPLICATION\n${application}` }] }],
     generationConfig: {
       temperature: 0.3,
       maxOutputTokens: 900,

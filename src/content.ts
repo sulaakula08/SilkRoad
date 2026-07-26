@@ -146,6 +146,13 @@ export type Dict = {
     stage: string
     ticket: string
     deck: string
+    deckUpload: string
+    deckHint: string
+    deckReading: string
+    deckRemove: string
+    deckErrUnsupported: string
+    deckErrBig: string
+    deckErrEmpty: string
     description: string
     descriptionHint: string
     message: string
@@ -338,6 +345,13 @@ export const CONTENT: Record<'ru' | 'en', Dict> = {
       stage: 'Стадия',
       ticket: 'Размер чека',
       deck: 'Ссылка на питч-дек',
+      deckUpload: 'или загрузите файл',
+      deckHint: 'PDF или PPTX, до 15 МБ — ИИ прочитает дек',
+      deckReading: 'Читаем дек…',
+      deckRemove: 'Убрать',
+      deckErrUnsupported: 'Поддерживаются только PDF и PPTX',
+      deckErrBig: 'Файл больше 15 МБ',
+      deckErrEmpty: 'Не удалось извлечь текст из файла',
       description: 'Что вы строите?',
       descriptionHint: 'Продукт, тяга, почему сейчас — пару предложений. Заявку сразу оценит ИИ.',
       message: 'Коротко о себе',
@@ -517,6 +531,13 @@ export const CONTENT: Record<'ru' | 'en', Dict> = {
       stage: 'Stage',
       ticket: 'Cheque size',
       deck: 'Pitch deck link',
+      deckUpload: 'or upload a file',
+      deckHint: 'PDF or PPTX, up to 15 MB — our AI reads the deck',
+      deckReading: 'Reading the deck…',
+      deckRemove: 'Remove',
+      deckErrUnsupported: 'Only PDF and PPTX are supported',
+      deckErrBig: 'File is larger than 15 MB',
+      deckErrEmpty: 'Could not extract text from the file',
       description: 'What are you building?',
       descriptionHint: 'Product, traction, why now — a few sentences. Our AI reviews it instantly.',
       message: 'A little about you',
