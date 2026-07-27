@@ -7,6 +7,7 @@ import { Values } from './sections/Values'
 import { Advantages } from './sections/Advantages'
 import { Club } from './sections/Club'
 import { Ecosystem } from './sections/Ecosystem'
+import { Radar } from './sections/Radar'
 import { TrackRecord } from './sections/TrackRecord'
 import { Team } from './sections/Team'
 import { Portfolio } from './sections/Portfolio'
@@ -27,6 +28,7 @@ function Home() {
       <Club />
       <Values />
       <Ecosystem />
+      <Radar />
       <TrackRecord />
       <Team />
       <Portfolio />

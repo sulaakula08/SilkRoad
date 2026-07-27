@@ -72,12 +72,33 @@ export const PORTFOLIO: Company[] = [
 
 export type Dict = {
   nav: {
+    radar: string
     calendar: string
     blog: string
     contacts: string
     faq: string
     apply: string
     forInvestors: string
+  }
+  radar: {
+    index: string
+    label: string
+    title: string
+    subtitle: string
+    live: string
+    updated: string
+    justNow: string
+    kpis: string[]
+    countriesTitle: string
+    qoq: string
+    feedTitle: string
+    eventsTitle: string
+    eventsCta: string
+    note: string
+    countries: Record<string, string>
+    sectors: Record<string, string>
+    cities: Record<string, string>
+    months: string[]
   }
   hero: {
     badge: string
@@ -189,12 +210,55 @@ const PHOTO = { asset: '/hub-2.jpg', abay: '/hub-1.jpg', rysty: '/hub-3.jpg' }
 export const CONTENT: Record<'ru' | 'en', Dict> = {
   ru: {
     nav: {
+      radar: 'Радар',
       calendar: 'Календарь',
       blog: 'Блог',
       contacts: 'Контакты',
       faq: 'FAQ',
       apply: 'Отправить заявку',
       forInvestors: 'Для инвесторов',
+    },
+    radar: {
+      index: '05',
+      label: 'Живой радар экосистемы',
+      title: 'Пульс стартапов Центральной Азии',
+      subtitle:
+        'Финансирование, сделки и события по региону — в одной живой панели. Данные обновляются в реальном времени.',
+      live: 'LIVE',
+      updated: 'Обновлено',
+      justNow: 'только что',
+      kpis: ['Капитал за год', 'Раундов за 12 мес', 'Активных стартапов', 'Событий за год'],
+      countriesTitle: 'Финансирование по странам',
+      qoq: 'кв/кв',
+      feedTitle: 'Лента сделок',
+      eventsTitle: 'Ближайшие события',
+      eventsCta: 'Все события',
+      note: 'Иллюстративные агрегированные данные экосистемы. Готово к подключению живого источника.',
+      countries: {
+        KZ: 'Казахстан',
+        UZ: 'Узбекистан',
+        KG: 'Кыргызстан',
+        TJ: 'Таджикистан',
+        TM: 'Туркменистан',
+      },
+      sectors: {
+        fintech: 'Финтех',
+        ai: 'ИИ',
+        health: 'Здоровье',
+        logistics: 'Логистика',
+        agri: 'Агротех',
+        ecommerce: 'E-commerce',
+        deeptech: 'Deep tech',
+        edtech: 'EdTech',
+      },
+      cities: {
+        astana: 'Астана',
+        tashkent: 'Ташкент',
+        almaty: 'Алматы',
+        bishkek: 'Бишкек',
+        paloalto: 'Пало-Альто',
+      },
+      months: ['янв', 'фев', 'мар', 'апр', 'мая', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'],
     },
     hero: {
       badge: 'При поддержке Silkroad Innovation Hub',
@@ -407,12 +471,55 @@ export const CONTENT: Record<'ru' | 'en', Dict> = {
 
   en: {
     nav: {
+      radar: 'Radar',
       calendar: 'Calendar',
       blog: 'Blog',
       contacts: 'Contacts',
       faq: 'FAQ',
       apply: 'Apply now',
       forInvestors: 'For investors',
+    },
+    radar: {
+      index: '05',
+      label: 'Live ecosystem radar',
+      title: 'The Central Asia startup pulse',
+      subtitle:
+        'Funding, deals and events across the region in one live board — updating in real time.',
+      live: 'LIVE',
+      updated: 'Updated',
+      justNow: 'just now',
+      kpis: ['Capital tracked YTD', 'Rounds (12 mo)', 'Active startups', 'Events YTD'],
+      countriesTitle: 'Funding by country',
+      qoq: 'QoQ',
+      feedTitle: 'Deal feed',
+      eventsTitle: 'Upcoming events',
+      eventsCta: 'All events',
+      note: 'Illustrative aggregate ecosystem data. Ready to wire to a live source.',
+      countries: {
+        KZ: 'Kazakhstan',
+        UZ: 'Uzbekistan',
+        KG: 'Kyrgyzstan',
+        TJ: 'Tajikistan',
+        TM: 'Turkmenistan',
+      },
+      sectors: {
+        fintech: 'Fintech',
+        ai: 'AI',
+        health: 'HealthTech',
+        logistics: 'Logistics',
+        agri: 'AgriTech',
+        ecommerce: 'E-commerce',
+        deeptech: 'Deep tech',
+        edtech: 'EdTech',
+      },
+      cities: {
+        astana: 'Astana',
+        tashkent: 'Tashkent',
+        almaty: 'Almaty',
+        bishkek: 'Bishkek',
+        paloalto: 'Palo Alto',
+      },
+      months: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
     },
     hero: {
       badge: 'Supported by Silkroad Innovation Hub',
