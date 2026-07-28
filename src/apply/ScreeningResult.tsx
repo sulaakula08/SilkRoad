@@ -10,8 +10,6 @@ export type Screening = {
   strengths: string[]
   flags: string[]
   matchedTheses: string[]
-  recommendation: string
-  rationale: string
 }
 
 const EASE = [0.16, 1, 0.3, 1] as const
@@ -24,9 +22,8 @@ const UI = {
     tags: 'Auto-tagged',
     stage: 'Stage',
     strengths: 'Strengths',
-    flags: 'To verify',
+    flags: 'What you should improve',
     match: 'Thesis match',
-    rec: 'Recommended track',
     human: 'This is an automated pre-screen, not a decision. A partner reviews every application.',
     verdict: { strong: 'Strong fit', promising: 'Promising', early: 'Early', weak: 'Not yet' },
   },
@@ -36,9 +33,8 @@ const UI = {
     tags: 'Авто-теги',
     stage: 'Стадия',
     strengths: 'Сильные стороны',
-    flags: 'Проверить',
+    flags: 'Что стоит улучшить',
     match: 'Совпадение с фокусом',
-    rec: 'Рекомендованный трек',
     human: 'Это автоматический предскрининг, а не решение. Каждую заявку смотрит партнёр.',
     verdict: { strong: 'Сильное совпадение', promising: 'Перспективно', early: 'Рано', weak: 'Пока нет' },
   },
@@ -60,12 +56,6 @@ const STAGE_RU: Record<string, string> = {
   'Pre-seed': 'Pre-seed',
   Seed: 'Seed',
   'Series A': 'Series A',
-}
-const TRACK_RU: Record<string, string> = {
-  'Fast track': 'Быстрый трек',
-  'Standard review': 'Стандартное рассмотрение',
-  'Corridor review': 'Корридорное рассмотрение',
-  'Too early': 'Слишком рано',
 }
 const THESIS_RU: Record<string, string> = {
   'AI-native products': 'ИИ-продукты',
@@ -148,35 +138,22 @@ export function ScreeningResult({
         )}
       </div>
 
-      {/* recommendation + thesis match */}
-      <div className="mt-6 rounded-xl border border-rule bg-snow px-5 py-4">
-        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-          <div>
-            <p className="text-[12px] tracking-[0.1em] text-ink-45 uppercase">{u.rec}</p>
-            <p className="mt-0.5 font-display text-[16px] font-semibold">
-              {tr(TRACK_RU, data.recommendation)}
-            </p>
+      {/* thesis match */}
+      {data.matchedTheses.length > 0 && (
+        <div className="mt-6 rounded-xl border border-rule bg-snow px-5 py-4">
+          <p className="text-[12px] tracking-[0.1em] text-ink-45 uppercase">{u.match}</p>
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {data.matchedTheses.map((t) => (
+              <span
+                key={t}
+                className="rounded-full bg-oxford/6 px-2.5 py-1 text-[12px] font-medium text-oxford"
+              >
+                {tr(THESIS_RU, t)}
+              </span>
+            ))}
           </div>
-          {data.matchedTheses.length > 0 && (
-            <div className="text-right">
-              <p className="text-[12px] tracking-[0.1em] text-ink-45 uppercase">{u.match}</p>
-              <div className="mt-1 flex flex-wrap justify-end gap-1.5">
-                {data.matchedTheses.map((t) => (
-                  <span
-                    key={t}
-                    className="rounded-full bg-oxford/6 px-2.5 py-1 text-[12px] font-medium text-oxford"
-                  >
-                    {tr(THESIS_RU, t)}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
-        <p className="mt-3 border-t border-rule pt-3 text-[13.5px] leading-relaxed text-ink-70">
-          {data.rationale}
-        </p>
-      </div>
+      )}
 
       <p className="mt-5 text-[12.5px] leading-relaxed text-ink-45">{u.human}</p>
 

@@ -85,15 +85,16 @@ export type Dict = {
     label: string
     title: string
     subtitle: string
-    live: string
-    updated: string
-    justNow: string
+    asOf: string
     kpis: string[]
+    kpiNotes: string[]
     countriesTitle: string
-    qoq: string
+    shareOf: string
+    noData: string
     feedTitle: string
+    feedNote: string
     eventsTitle: string
-    eventsCta: string
+    sourcesTitle: string
     note: string
     countries: Record<string, string>
     sectors: Record<string, string>
@@ -146,7 +147,7 @@ export type Dict = {
   team: {
     title: string
     subtitle: string
-    members: { photo: string; name: string; role: string }[]
+    members: { photo: string; name: string; role: string; linkedin: string }[]
   }
   portfolio: {
     title: string
@@ -207,6 +208,13 @@ export type Dict = {
 /** Team photos in public/, mapped to the people in the deck's "Our team" slide. */
 const PHOTO = { asset: '/hub-2.jpg', abay: '/hub-1.jpg', rysty: '/hub-3.jpg' }
 
+/** Public LinkedIn profiles — the portrait cards link straight through. */
+const LINKEDIN = {
+  asset: 'https://www.linkedin.com/in/abdualiyev/',
+  abay: 'https://www.linkedin.com/in/abay-absamet/',
+  rysty: 'https://www.linkedin.com/in/rystyissagulova/',
+}
+
 export const CONTENT: Record<'ru' | 'en', Dict> = {
   ru: {
     nav: {
@@ -220,20 +228,31 @@ export const CONTENT: Record<'ru' | 'en', Dict> = {
     },
     radar: {
       index: '05',
-      label: 'Живой радар экосистемы',
+      label: 'Радар экосистемы',
       title: 'Пульс стартапов Центральной Азии',
       subtitle:
-        'Финансирование, сделки и события по региону — в одной живой панели. Данные обновляются в реальном времени.',
-      live: 'LIVE',
-      updated: 'Обновлено',
-      justNow: 'только что',
-      kpis: ['Капитал за год', 'Раундов за 12 мес', 'Активных стартапов', 'Событий за год'],
+        'Финансирование, сделки и события по региону — по публичным отраслевым отчётам и сообщениям в СМИ. Каждая цифра со ссылкой на источник.',
+      asOf: 'Данные за 2025 год · последняя сверка — июль 2026',
+      kpis: [
+        'Венчурный объём региона, 2025',
+        'Казахстан, 2025',
+        'Узбекистан, 2025',
+        'Доля двух мегасделок',
+      ],
+      kpiNotes: [
+        'Рекорд, RISE Research',
+        'Рост почти в 3 раза год к году',
+        'Рост в 11,3 раза с 2022 года',
+        'Higgsfield и Uzum от объёма рынка',
+      ],
       countriesTitle: 'Финансирование по странам',
-      qoq: 'кв/кв',
-      feedTitle: 'Лента сделок',
-      eventsTitle: 'Ближайшие события',
-      eventsCta: 'Все события',
-      note: 'Иллюстративные агрегированные данные экосистемы. Готово к подключению живого источника.',
+      shareOf: 'от регионального объёма',
+      noData: 'Публичных данных нет',
+      feedTitle: 'Крупнейшие раскрытые раунды',
+      feedNote: 'Раунды, официально объявленные компаниями или подтверждённые СМИ.',
+      eventsTitle: 'Ключевые события экосистемы',
+      sourcesTitle: 'Источники',
+      note: 'Все показатели взяты из публичных источников, перечисленных выше. Это не инвестиционная рекомендация; данные обновляются вручную по мере выхода новых отчётов.',
       countries: {
         KZ: 'Казахстан',
         UZ: 'Узбекистан',
@@ -257,6 +276,7 @@ export const CONTENT: Record<'ru' | 'en', Dict> = {
         almaty: 'Алматы',
         bishkek: 'Бишкек',
         paloalto: 'Пало-Альто',
+        sanfrancisco: 'Сан-Франциско',
       },
       months: ['янв', 'фев', 'мар', 'апр', 'мая', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'],
     },
@@ -384,9 +404,9 @@ export const CONTENT: Record<'ru' | 'en', Dict> = {
       title: 'Наша команда',
       subtitle: 'Люди, которые стоят за хабом и клубом.',
       members: [
-        { photo: PHOTO.asset, name: 'Асет Абдуалиев', role: 'Основатель' },
-        { photo: PHOTO.abay, name: 'Абай Абсамет', role: 'Сооснователь' },
-        { photo: PHOTO.rysty, name: 'Рысты Исагулова', role: 'Венчурный аналитик' },
+        { photo: PHOTO.asset, name: 'Асет Абдуалиев', role: 'Основатель', linkedin: LINKEDIN.asset },
+        { photo: PHOTO.abay, name: 'Абай Абсамет', role: 'Сооснователь', linkedin: LINKEDIN.abay },
+        { photo: PHOTO.rysty, name: 'Рысты Исагулова', role: 'Венчурный аналитик', linkedin: LINKEDIN.rysty },
       ],
     },
     portfolio: {
@@ -481,20 +501,31 @@ export const CONTENT: Record<'ru' | 'en', Dict> = {
     },
     radar: {
       index: '05',
-      label: 'Live ecosystem radar',
+      label: 'Ecosystem radar',
       title: 'The Central Asia startup pulse',
       subtitle:
-        'Funding, deals and events across the region in one live board — updating in real time.',
-      live: 'LIVE',
-      updated: 'Updated',
-      justNow: 'just now',
-      kpis: ['Capital tracked YTD', 'Rounds (12 mo)', 'Active startups', 'Events YTD'],
+        'Funding, deals and events across the region — drawn from published industry reports and press coverage. Every figure is sourced.',
+      asOf: 'Full-year 2025 data · last checked July 2026',
+      kpis: [
+        'Regional VC volume, 2025',
+        'Kazakhstan, 2025',
+        'Uzbekistan, 2025',
+        'Share from two mega-deals',
+      ],
+      kpiNotes: [
+        'All-time high, RISE Research',
+        'Nearly 3x year on year',
+        '11.3x growth since 2022',
+        'Higgsfield and Uzum, of market volume',
+      ],
       countriesTitle: 'Funding by country',
-      qoq: 'QoQ',
-      feedTitle: 'Deal feed',
-      eventsTitle: 'Upcoming events',
-      eventsCta: 'All events',
-      note: 'Illustrative aggregate ecosystem data. Ready to wire to a live source.',
+      shareOf: 'of regional volume',
+      noData: 'No public data',
+      feedTitle: 'Largest disclosed rounds',
+      feedNote: 'Rounds announced by the companies or confirmed in the press.',
+      eventsTitle: 'Key ecosystem events',
+      sourcesTitle: 'Sources',
+      note: 'All figures come from the public sources listed above. This is not investment advice; the data is updated manually as new reports are published.',
       countries: {
         KZ: 'Kazakhstan',
         UZ: 'Uzbekistan',
@@ -518,6 +549,7 @@ export const CONTENT: Record<'ru' | 'en', Dict> = {
         almaty: 'Almaty',
         bishkek: 'Bishkek',
         paloalto: 'Palo Alto',
+        sanfrancisco: 'San Francisco',
       },
       months: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
     },
@@ -613,9 +645,9 @@ export const CONTENT: Record<'ru' | 'en', Dict> = {
       title: 'Our team',
       subtitle: 'The people behind the hub and the club.',
       members: [
-        { photo: PHOTO.asset, name: 'Asset Abdualiyev', role: 'Founder' },
-        { photo: PHOTO.abay, name: 'Abay Absamet', role: 'Co-Founder' },
-        { photo: PHOTO.rysty, name: 'Rysty Issagulova', role: 'Venture Analyst' },
+        { photo: PHOTO.asset, name: 'Asset Abdualiyev', role: 'Founder', linkedin: LINKEDIN.asset },
+        { photo: PHOTO.abay, name: 'Abay Absamet', role: 'Co-Founder', linkedin: LINKEDIN.abay },
+        { photo: PHOTO.rysty, name: 'Rysty Issagulova', role: 'Venture Analyst', linkedin: LINKEDIN.rysty },
       ],
     },
     portfolio: {

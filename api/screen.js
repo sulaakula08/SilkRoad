@@ -26,7 +26,6 @@ const SECTORS = [
 ]
 const STAGES = ['Idea', 'Pre-seed', 'Seed', 'Series A']
 const VERDICTS = ['strong', 'promising', 'early', 'weak']
-const TRACKS = ['Fast track', 'Standard review', 'Corridor review', 'Too early']
 const THESES = [
   'AI-native products',
   'B2B SaaS with revenue',
@@ -46,12 +45,14 @@ const SCHEMA = {
     verdict: { type: 'string', enum: VERDICTS },
     summary: { type: 'string', description: 'One neutral sentence, in the requested language' },
     strengths: { type: 'array', items: { type: 'string' }, description: '2–3 short points, requested language' },
-    flags: { type: 'array', items: { type: 'string' }, description: '1–3 risks or things to verify, requested language' },
+    flags: {
+      type: 'array',
+      items: { type: 'string' },
+      description: '1–3 concrete, actionable things the founder should improve, requested language',
+    },
     matchedTheses: { type: 'array', items: { type: 'string', enum: THESES }, description: 'Investor theses this fits' },
-    recommendation: { type: 'string', enum: TRACKS },
-    rationale: { type: 'string', description: 'One sentence on the recommendation, requested language' },
   },
-  required: ['sectors', 'stage', 'score', 'verdict', 'summary', 'strengths', 'flags', 'matchedTheses', 'recommendation', 'rationale'],
+  required: ['sectors', 'stage', 'score', 'verdict', 'summary', 'strengths', 'flags', 'matchedTheses'],
 }
 
 function readBody(req) {
@@ -126,20 +127,19 @@ club investing in early-stage Silicon Valley startups (min $10k per deal),
 connected to founders across Central Eurasia. Screen the application below.
 
 Be sharp, fair and concrete. Base everything ONLY on what the founder wrote —
-never invent metrics or facts. If information is thin, say so in the flags and
-keep the score modest; do not reward vagueness.
+never invent metrics or facts. If information is thin, say so and keep the
+score modest; do not reward vagueness.
 
 Scoring (0–100) reflects fit + potential for an early-stage SV angel:
   80–100 strong · 60–79 promising · 40–59 early · 0–39 weak.
 
-Recommendation guide:
-  "Too early"        — idea stage, no product.
-  "Corridor review"  — real product/traction but clearly non-US / regional-only setup.
-  "Fast track"       — seed/Series A with a product and a real signal.
-  "Standard review"  — everything else worth a look.
+"flags" is advice shown to the founder under the heading "What you should
+improve". Each item must be actionable and specific — name the thing to fix,
+add or prove (e.g. "Show traction: users, revenue or pilots"), never a bare
+verdict like "too early" or "not enough information".
 
-Write summary, strengths, flags and rationale in ${lang}. Keep every string
-tight (strengths/flags: max ~12 words each). Return ONLY the JSON object.
+Write summary, strengths and flags in ${lang}. Keep every string tight
+(strengths/flags: max ~12 words each). Return ONLY the JSON object.
 `.trim()
 
   const payload = {
@@ -193,7 +193,6 @@ tight (strengths/flags: max ~12 words each). Return ONLY the JSON object.
   result.sectors = (result.sectors || []).filter((x) => SECTORS.includes(x)).slice(0, 3)
   if (!STAGES.includes(result.stage)) result.stage = 'Pre-seed'
   if (!VERDICTS.includes(result.verdict)) result.verdict = 'early'
-  if (!TRACKS.includes(result.recommendation)) result.recommendation = 'Standard review'
   result.matchedTheses = (result.matchedTheses || []).filter((x) => THESES.includes(x)).slice(0, 4)
   result.strengths = (result.strengths || []).slice(0, 3)
   result.flags = (result.flags || []).slice(0, 3)

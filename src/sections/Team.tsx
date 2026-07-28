@@ -28,22 +28,36 @@ export function Team() {
         <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {t.team.members.map((m, i) => (
             <Reveal key={m.name} delay={i * 0.08}>
-              <figure className="group relative aspect-[4/5] overflow-hidden rounded-2xl bg-oxford ring-1 ring-rule">
-                <img
-                  src={m.photo}
-                  alt={m.name}
-                  loading="lazy"
-                  className="h-full w-full object-cover transition-transform duration-[600ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.03]"
-                />
-                {/* name plate */}
-                <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-oxford via-oxford/70 to-transparent px-5 pt-16 pb-5">
-                  <figcaption>
-                    <p className="font-display text-[1.15rem] leading-tight font-semibold text-snow">
-                      {m.name}
-                    </p>
-                    <p className="mt-0.5 text-[14px] text-turquoise">{m.role}</p>
-                  </figcaption>
-                </div>
+              <figure className="group relative aspect-[4/5] overflow-hidden rounded-2xl bg-oxford ring-1 ring-rule transition-shadow duration-300 hover:shadow-[0_16px_40px_rgba(0,32,63,0.14)]">
+                <a
+                  href={m.linkedin}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={`${m.name} — LinkedIn`}
+                  className="block h-full w-full"
+                >
+                  <img
+                    src={m.photo}
+                    alt={m.name}
+                    loading="lazy"
+                    className="h-full w-full object-cover transition-transform duration-[600ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.03]"
+                  />
+                  {/* LinkedIn badge — appears on hover, hints the card is a link */}
+                  <span className="absolute top-4 right-4 grid size-9 place-items-center rounded-full bg-snow/90 text-oxford opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                    <svg viewBox="0 0 24 24" fill="currentColor" className="size-4">
+                      <path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9h4v12H3zM10 9h3.8v1.7h.05c.53-.95 1.83-1.95 3.76-1.95C21.4 8.75 22 11.1 22 14.2V21h-4v-6c0-1.43-.03-3.27-2-3.27-2 0-2.3 1.56-2.3 3.17V21h-4z" />
+                    </svg>
+                  </span>
+                  {/* name plate */}
+                  <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-oxford via-oxford/70 to-transparent px-5 pt-16 pb-5">
+                    <figcaption>
+                      <p className="font-display text-[1.15rem] leading-tight font-semibold text-snow">
+                        {m.name}
+                      </p>
+                      <p className="mt-0.5 text-[14px] text-turquoise">{m.role}</p>
+                    </figcaption>
+                  </div>
+                </a>
               </figure>
             </Reveal>
           ))}
