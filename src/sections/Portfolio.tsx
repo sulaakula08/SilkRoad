@@ -28,10 +28,10 @@ function Card({ c, featured }: { c: Company; featured?: boolean }) {
         className={`flex w-full items-center ${featured ? 'h-20 py-2' : 'h-16 py-1.5'} overflow-hidden`}
       >
         <img
-          src={`/portfolio/${c.slug}.png`}
+          src={c.logo ?? `/portfolio/${c.slug}.png`}
           alt={c.name}
           loading="lazy"
-          className="max-h-full w-auto max-w-[88%] object-contain object-left"
+          className="h-full w-[88%] object-contain object-left"
         />
       </div>
 

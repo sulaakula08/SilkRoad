@@ -24,7 +24,9 @@ export const CONTACT = {
  * "show more". `url` is set where the official site is known; otherwise the
  * card falls back to a web search for the name.
  */
-export type Company = { slug: string; name: string; tag: string; url?: string }
+/** `logo` overrides the default /portfolio/<slug>.png — set it where the
+ *  company publishes a vector mark we can use instead of a raster one. */
+export type Company = { slug: string; name: string; tag: string; url?: string; logo?: string }
 
 export const PORTFOLIO: Company[] = [
   // featured
@@ -34,13 +36,13 @@ export const PORTFOLIO: Company[] = [
   { slug: 'kodif', name: 'Kodif', tag: 'Gen-AI customer support automation', url: 'https://kodif.ai' },
   // the rest
   { slug: 'perceptis', name: 'Perceptis', tag: 'AI-generated business proposals' },
-  { slug: 'datatruck', name: 'DataTruck', tag: 'AI logistics automation for freight' },
+  { slug: 'datatruck', name: 'DataTruck', tag: 'AI logistics automation for freight', url: 'https://www.datatruck.io', logo: '/portfolio/datatruck.svg' },
   { slug: 'surfaice', name: 'Surfaice', tag: 'Autonomous construction automation' },
-  { slug: 'numeo', name: 'Numeo', tag: 'AI freight matching for carriers' },
+  { slug: 'numeo', name: 'Numeo', tag: 'AI freight matching for carriers', url: 'https://numeo.ai', logo: '/portfolio/numeo.svg' },
   { slug: 'atarino', name: 'Atarino', tag: 'Gamified AI assistant for drivers' },
   { slug: 'fleetmule', name: 'FleetMule', tag: 'Fleet management & logistics' },
   { slug: 'radar', name: 'Radar Therapeutics', tag: 'Programmable precision therapeutics' },
-  { slug: 'topmd', name: 'TopMD Health', tag: 'AI medical concierge' },
+  { slug: 'topmd', name: 'TopMD Health', tag: 'AI medical concierge', url: 'https://www.topmdhealth.com' },
   { slug: 'chatfuel', name: 'Chatfuel', tag: 'AI OS for healthcare & wellness', url: 'https://chatfuel.com' },
   { slug: 'renotag', name: 'Renotag', tag: 'AI platform for home renovations' },
   { slug: 'tangible', name: 'Tangible', tag: 'Carbon tracking for construction' },
