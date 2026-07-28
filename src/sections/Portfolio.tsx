@@ -19,15 +19,19 @@ function Card({ c, featured }: { c: Company; featured?: boolean }) {
       rel="noopener noreferrer"
       className="group flex h-full flex-col rounded-2xl border border-rule bg-white p-5 transition-[border-color,transform,box-shadow] duration-300 hover:-translate-y-1 hover:border-turquoise hover:shadow-[0_16px_40px_rgba(0,32,63,0.08)]"
     >
-      {/* Logo plate. The box is fixed and the image is object-contain inside it,
-          so every logo is optically normalised and none can spill out of the
-          card, whatever its aspect ratio. */}
-      <div className={`w-full ${featured ? 'h-20' : 'h-14'} overflow-hidden`}>
+      {/* Logo plate. The source PNGs are cropped tight — the artwork runs to the
+          pixel edge with no built-in margin — so the image must never fill the
+          plate, or it reads as spilling out of the card. The vertical padding
+          and the width cap below guarantee optical margin on all four sides,
+          whatever the aspect ratio (these range from ~1:1 to 12:1). */}
+      <div
+        className={`flex w-full items-center ${featured ? 'h-20 py-2' : 'h-16 py-1.5'} overflow-hidden`}
+      >
         <img
           src={`/portfolio/${c.slug}.png`}
           alt={c.name}
           loading="lazy"
-          className="h-full w-full object-contain object-left"
+          className="max-h-full w-auto max-w-[88%] object-contain object-left"
         />
       </div>
 
