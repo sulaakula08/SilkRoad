@@ -101,26 +101,6 @@ export function Hero() {
         </div>
       </div>
 
-      {/* Stats band */}
-      <div className="relative border-t border-white/10">
-        <dl className="mx-auto grid max-w-7xl grid-cols-2 divide-x divide-white/10 px-6 sm:px-8 lg:grid-cols-4">
-          {t.stats.map((s, i) => (
-            <motion.div
-              key={s.label}
-              initial={still ? false : { opacity: 0, y: 12 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: i * 0.07, ease: [0.16, 1, 0.3, 1] }}
-              className="px-2 py-8 first:pl-0 sm:px-6 sm:py-10"
-            >
-              <dt className="font-display text-[2.25rem] font-semibold text-turquoise tabular-nums sm:text-[2.75rem]">
-                {s.n}
-              </dt>
-              <dd className="mt-1 text-[13.5px] text-snow/55">{s.label}</dd>
-            </motion.div>
-          ))}
-        </dl>
-      </div>
     </section>
   )
 }

@@ -3,7 +3,6 @@ import { Route, Routes, useLocation } from 'react-router-dom'
 import { Nav } from './components/Nav'
 import { Hero } from './sections/Hero'
 import { Value } from './sections/Value'
-import { Values } from './sections/Values'
 import { Advantages } from './sections/Advantages'
 import { Club } from './sections/Club'
 import { Ecosystem } from './sections/Ecosystem'
@@ -26,10 +25,9 @@ function Home() {
       <Value />
       <Advantages />
       <Club />
-      <Values />
+      <TrackRecord />
       <Ecosystem />
       <Radar />
-      <TrackRecord />
       <Team />
       <Portfolio />
       <Apply />

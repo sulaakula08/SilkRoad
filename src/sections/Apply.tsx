@@ -1,5 +1,6 @@
 import { useParams } from 'react-router-dom'
 import { Index, Reveal } from '../components/ui'
+import { ContactButtons } from '../components/ContactButtons'
 import { ApplyForm, type Tab } from '../apply/ApplyForm'
 import { useI18n } from '../i18n'
 import { CONTACT } from '../content'
@@ -28,30 +29,13 @@ export function Apply() {
               </p>
             </Reveal>
             <Reveal delay={0.14}>
-              <div className="mt-8 space-y-2 text-[14.5px]">
-                <a
-                  href={`mailto:${CONTACT.email}`}
-                  className="block text-ink-70 underline decoration-turquoise decoration-2 underline-offset-4 transition-colors hover:text-oxford"
-                >
-                  {CONTACT.email}
-                </a>
-                <a
-                  href={CONTACT.whatsapp}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block text-ink-70 transition-colors hover:text-oxford"
-                >
-                  WhatsApp · {CONTACT.phone}
-                </a>
-                <a
-                  href={CONTACT.telegram}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block text-ink-70 transition-colors hover:text-oxford"
-                >
-                  Telegram
-                </a>
-              </div>
+              <ContactButtons tone="light" className="mt-8" />
+              <a
+                href={`tel:${CONTACT.phone.replace(/\s/g, '')}`}
+                className="mt-4 inline-block text-[14.5px] text-ink-45 transition-colors hover:text-oxford"
+              >
+                {CONTACT.phone}
+              </a>
             </Reveal>
           </div>
 

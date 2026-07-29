@@ -12,7 +12,13 @@ export const CONTACT = {
   email: 'Invest@slkrd.club',
   phone: '+7 706 747 74 23',
   phoneRaw: '77067477423',
-  telegram: 'https://t.me/arabjanov',
+  /** Silkroad Innovation Hub — the club's parent organisation. */
+  hub: 'https://silkroadinnovationhub.com/',
+  linkedin: 'https://www.linkedin.com/company/silkroad-innovation-hub/',
+  /** Both messengers resolve to the same number, so they never drift apart. */
+  get telegram() {
+    return `https://t.me/+${this.phoneRaw}`
+  },
   get whatsapp() {
     return `https://wa.me/${this.phoneRaw}`
   },
@@ -110,16 +116,10 @@ export type Dict = {
     cta: string
     scroll: string
   }
-  stats: { n: string; label: string }[]
   value: {
     items: { title: string; body: string }[]
     hubTitle: string
     hubBody: string
-  }
-  values: {
-    title: string
-    subtitle: string
-    items: { title: string; body: string }[]
   }
   advantages: {
     title: string
@@ -289,12 +289,6 @@ export const CONTENT: Record<'ru' | 'en', Dict> = {
       cta: 'Отправить заявку',
       scroll: 'Листайте вниз',
     },
-    stats: [
-      { n: '285+', label: 'стартапов проакселерировано' },
-      { n: '167+', label: 'инвесторов обучено' },
-      { n: '19+', label: 'стартапов профинансировано' },
-      { n: '263+', label: 'проведённых мероприятий' },
-    ],
     value: {
       items: [
         {
@@ -313,17 +307,6 @@ export const CONTENT: Record<'ru' | 'en', Dict> = {
       hubTitle: 'Silkroad Innovation Hub',
       hubBody:
         'Создано основателем ведущего инновационного центра в Кремниевой долине.',
-    },
-    values: {
-      title: 'Наши принципы',
-      subtitle: 'То, на чём мы стоим.',
-      items: [
-        { title: 'Честность', body: 'Мы записываем, почему отказали, — и отправляем это.' },
-        { title: 'Инновации', body: 'Пайплайн уровня Долины — или он не выходит.' },
-        { title: 'Поддержка', body: 'Никто не делает первый чек, не понимая почему.' },
-        { title: 'Сообщество', body: 'Сеть, где отвечают на звонки друг друга.' },
-        { title: 'Глобальное мышление', body: 'Два рынка — один стандарт.' },
-      ],
     },
     advantages: {
       title: 'Преимущества ангельского инвестирования',
@@ -389,7 +372,7 @@ export const CONTENT: Record<'ru' | 'en', Dict> = {
       cta: 'Отправить заявку',
     },
     track: {
-      title: 'Наш послужной список',
+      title: 'Цифры',
       subtitle:
         'Реальные результаты портфеля Silkroad Innovation Hub — от первого чека до Долины.',
       stats: [
@@ -562,12 +545,6 @@ export const CONTENT: Record<'ru' | 'en', Dict> = {
       cta: 'Apply now',
       scroll: 'Scroll',
     },
-    stats: [
-      { n: '285+', label: 'startups accelerated' },
-      { n: '167+', label: 'investors trained' },
-      { n: '19+', label: 'startups backed' },
-      { n: '263+', label: 'events held' },
-    ],
     value: {
       items: [
         { title: 'Low minimum investment', body: 'Co-invest alongside the club from $10,000, spreading your risk across deals.' },
@@ -576,17 +553,6 @@ export const CONTENT: Record<'ru' | 'en', Dict> = {
       ],
       hubTitle: 'Silkroad Innovation Hub',
       hubBody: 'Built by the founder of a leading Silicon Valley innovation hub.',
-    },
-    values: {
-      title: 'What we stand for',
-      subtitle: 'The things we hold to.',
-      items: [
-        { title: 'Integrity', body: 'We write down why we passed, and we send it.' },
-        { title: 'Innovation', body: 'The pipeline is Valley-grade or it does not go out.' },
-        { title: 'Empowerment', body: 'Nobody writes a first cheque here without knowing why.' },
-        { title: 'Community', body: 'A network that takes each other’s calls.' },
-        { title: 'Global mindset', body: 'Two markets, one set of standards.' },
-      ],
     },
     advantages: {
       title: 'The upside of angel investing',
@@ -630,7 +596,7 @@ export const CONTENT: Record<'ru' | 'en', Dict> = {
       cta: 'Apply now',
     },
     track: {
-      title: 'Track record',
+      title: 'Numbers',
       subtitle:
         'Real results from the Silkroad Innovation Hub portfolio — from first cheque to the Valley.',
       stats: [

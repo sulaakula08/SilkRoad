@@ -23,7 +23,7 @@ export function TrackRecord() {
 
       <div className="relative mx-auto max-w-7xl px-6 sm:px-8">
         <Reveal>
-          <IndexDark n="05" label={t.track.title} />
+          <IndexDark n="03" label={t.track.title} />
         </Reveal>
 
         <div className="mt-10 max-w-2xl">

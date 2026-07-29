@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { Logo } from '../components/Logo'
 import { Halftone } from '../components/Halftone'
 import { ArrowUpRight, Reveal } from '../components/ui'
+import { ContactButtons } from '../components/ContactButtons'
 import { useI18n } from '../i18n'
 import { CONTACT } from '../content'
 
@@ -13,13 +14,6 @@ export function Footer() {
     [t.ecosystem.title, '#ecosystem'],
     [t.portfolio.title, '#portfolio'],
     [t.faq.title, '#faq'],
-  ]
-
-  const contactLinks: [string, string][] = [
-    [CONTACT.email, `mailto:${CONTACT.email}`],
-    ['Telegram', CONTACT.telegram],
-    [`WhatsApp · ${CONTACT.phone}`, CONTACT.whatsapp],
-    [CONTACT.phone, `tel:${CONTACT.phone.replace(/\s/g, '')}`],
   ]
 
   return (
@@ -88,20 +82,13 @@ export function Footer() {
             <h3 className="text-[12.5px] tracking-[0.14em] text-snow/45 uppercase">
               {t.footer.contactsLabel}
             </h3>
-            <ul className="mt-5 space-y-3">
-              {contactLinks.map(([label, href]) => (
-                <li key={label}>
-                  <a
-                    href={href}
-                    target={href.startsWith('http') ? '_blank' : undefined}
-                    rel="noopener noreferrer"
-                    className="text-[14.5px] break-all text-snow/70 transition-colors duration-200 hover:text-turquoise"
-                  >
-                    {label}
-                  </a>
-                </li>
-              ))}
-            </ul>
+            <ContactButtons tone="dark" className="mt-5" />
+            <a
+              href={`tel:${CONTACT.phone.replace(/\s/g, '')}`}
+              className="mt-4 inline-block text-[14.5px] text-snow/55 transition-colors duration-200 hover:text-turquoise"
+            >
+              {CONTACT.phone}
+            </a>
           </div>
         </div>
 
