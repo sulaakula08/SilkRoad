@@ -12,6 +12,10 @@ function serverApi(env: Record<string, string>): PluginOption {
   // Make the server-side vars visible to the handlers via process.env.
   process.env.GEMINI_API_KEY ||= env.GEMINI_API_KEY || ''
   process.env.GEMINI_MODEL ||= env.GEMINI_MODEL || ''
+  process.env.NOTION_TOKEN ||= env.NOTION_TOKEN || ''
+  process.env.NOTION_INVESTORS_DATA_SOURCE_ID ||= env.NOTION_INVESTORS_DATA_SOURCE_ID || ''
+  process.env.NOTION_FOUNDERS_DATA_SOURCE_ID ||= env.NOTION_FOUNDERS_DATA_SOURCE_ID || ''
+  process.env.BLOB_READ_WRITE_TOKEN ||= env.BLOB_READ_WRITE_TOKEN || ''
 
   return {
     name: 'silkroad-server-api',
@@ -23,6 +27,18 @@ function serverApi(env: Record<string, string>): PluginOption {
       server.middlewares.use('/api/screen', async (req, res) => {
         const { screenHandler } = await server.ssrLoadModule('/api/screen.js')
         await screenHandler(req, res)
+      })
+      server.middlewares.use('/api/deck-upload', async (req, res) => {
+        const { deckUploadHandler } = await server.ssrLoadModule('/api/deck-upload.js')
+        await deckUploadHandler(req, res)
+      })
+      server.middlewares.use('/api/submissions', async (req, res) => {
+        const { submissionsHandler } = await server.ssrLoadModule('/api/submissions.js')
+        await submissionsHandler(req, res)
+      })
+      server.middlewares.use('/api/blob-cleanup', async (req, res) => {
+        const { blobCleanupHandler } = await server.ssrLoadModule('/api/blob-cleanup.js')
+        await blobCleanupHandler(req, res)
       })
     },
   }

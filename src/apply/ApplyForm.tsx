@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { useI18n } from '../i18n'
 import { ArrowUpRight } from '../components/ui'
 import { ScreeningResult, type Screening } from './ScreeningResult'
+import { submitApplication } from './submitApplication'
 
 // Deck upload accepts PDF/PPTX. The extractor (pdf.js + jszip) is heavy, so it's
 // dynamically imported in pickDeck — it never touches the initial bundle.
@@ -36,7 +37,10 @@ export function ApplyForm({ initialTab = 'investor' }: { initialTab?: Tab }) {
   const [errors, setErrors] = useState<Values>({})
   const [phase, setPhase] = useState<Phase>('form')
   const [screen, setScreen] = useState<Screening | null>(null)
+  const [submitError, setSubmitError] = useState('')
+  const [saving, setSaving] = useState(false)
   const [deckText, setDeckText] = useState('')
+  const [deckFile, setDeckFile] = useState<File | null>(null)
   const [deck, setDeck] = useState<{ name: string; status: 'reading' | 'ready' | 'error'; err?: string } | null>(null)
   const deckInput = useRef<HTMLInputElement>(null)
 
@@ -47,6 +51,7 @@ export function ApplyForm({ initialTab = 'investor' }: { initialTab?: Tab }) {
 
   const pickDeck = async (file?: File) => {
     if (!file) return
+    setDeckFile(file)
     setDeck({ name: file.name, status: 'reading' })
     setDeckText('')
     try {
@@ -56,6 +61,7 @@ export function ApplyForm({ initialTab = 'investor' }: { initialTab?: Tab }) {
       setDeck({ name: file.name, status: 'ready' })
     } catch (e) {
       const code = e instanceof Error ? e.message : ''
+      if (code === 'too-big' || code === 'unsupported') setDeckFile(null)
       const err =
         code === 'too-big' ? a.deckErrBig : code === 'unsupported' ? a.deckErrUnsupported : a.deckErrEmpty
       setDeck({ name: file.name, status: 'error', err })
@@ -63,12 +69,14 @@ export function ApplyForm({ initialTab = 'investor' }: { initialTab?: Tab }) {
   }
 
   const clearDeck = () => {
+    setDeckFile(null)
     setDeck(null)
     setDeckText('')
     if (deckInput.current) deckInput.current.value = ''
   }
 
   const switchTab = (next: Tab) => {
+    setSubmitError('')
     setTab(next)
     setErrors({})
   }
@@ -79,6 +87,8 @@ export function ApplyForm({ initialTab = 'investor' }: { initialTab?: Tab }) {
       : ['name', 'email', 'phone', 'company', 'stage', 'description']
 
   const reset = () => {
+    setSubmitError('')
+    setSaving(false)
     setV({})
     setErrors({})
     setScreen(null)
@@ -88,6 +98,7 @@ export function ApplyForm({ initialTab = 'investor' }: { initialTab?: Tab }) {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (saving) return
     const errs: Values = {}
     for (const id of required) {
       if (!String(v[id] ?? '').trim()) errs[id] = a.required
@@ -95,16 +106,32 @@ export function ApplyForm({ initialTab = 'investor' }: { initialTab?: Tab }) {
     if (v.email && !EMAIL.test(v.email)) errs.email = a.badEmail
     setErrors(errs)
     if (Object.keys(errs).length) return
+    setSubmitError('')
 
     // → send `{ tab, ...v }` to your CRM/endpoint here.
 
     if (tab === 'investor') {
+      setSaving(true)
+      try {
+        await submitApplication({ tab, lang, values: v, screening: null, deckText: '', deckFile: null })
+      } catch {
+        setSubmitError(
+          lang === 'ru'
+            ? 'Не удалось отправить заявку. Ваши данные сохранены в форме — попробуйте ещё раз.'
+            : 'We could not send your application. Your entries are still here — please try again.',
+        )
+        return
+      } finally {
+        setSaving(false)
+      }
       setPhase('sent')
       return
     }
 
     // Founder: run the AI pre-screen.
     setPhase('screening')
+    setScreen(null)
+    let screeningResult: Screening | null = null
     try {
       const res = await fetch('/api/screen', {
         method: 'POST',
@@ -122,8 +149,23 @@ export function ApplyForm({ initialTab = 'investor' }: { initialTab?: Tab }) {
       })
       const data = await res.json().catch(() => null)
       if (res.ok && data?.result) setScreen(data.result as Screening)
+      if (res.ok && data?.result) screeningResult = data.result as Screening
     } catch {
       /* screening is a bonus — a failure still accepts the application */
+    }
+    setSaving(true)
+    try {
+      await submitApplication({ tab, lang, values: v, screening: screeningResult, deckText, deckFile })
+    } catch {
+      setSubmitError(
+        lang === 'ru'
+          ? 'Не удалось отправить заявку. Ваши данные сохранены в форме — попробуйте ещё раз.'
+          : 'We could not send your application. Your entries are still here — please try again.',
+      )
+      setPhase('form')
+      return
+    } finally {
+      setSaving(false)
     }
     setPhase('sent')
   }
@@ -174,6 +216,15 @@ export function ApplyForm({ initialTab = 'investor' }: { initialTab?: Tab }) {
           transition={{ duration: 0.3, ease: EASE }}
           className="grid gap-5 p-6 sm:grid-cols-2 sm:p-8"
         >
+          <input
+            type="text"
+            value={v.contactWebsite ?? ''}
+            onChange={(e) => set('contactWebsite')(e.target.value)}
+            className="hidden"
+            tabIndex={-1}
+            autoComplete="off"
+            aria-hidden="true"
+          />
           <Field id="name" label={a.name} v={v} errors={errors} set={set} />
           <Field id="email" label={a.email} type="email" v={v} errors={errors} set={set} />
           <Field id="phone" label={a.phone} placeholder="+7 …" v={v} errors={errors} set={set} />
@@ -291,9 +342,19 @@ export function ApplyForm({ initialTab = 'investor' }: { initialTab?: Tab }) {
             </div>
           )}
 
+          {submitError && (
+            <div
+              role="alert"
+              className="sm:col-span-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-[13.5px] leading-relaxed text-red-700"
+            >
+              {submitError}
+            </div>
+          )}
+
           <div className="sm:col-span-2">
             <button
               type="submit"
+              disabled={saving}
               className="group inline-flex w-full items-center justify-center gap-2.5 rounded-full bg-oxford px-7 py-4 font-display text-[15.5px] font-semibold text-snow transition-colors duration-200 hover:bg-turquoise hover:text-oxford sm:w-auto"
             >
               {a.submit} <ArrowUpRight />

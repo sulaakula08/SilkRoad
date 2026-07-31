@@ -134,6 +134,10 @@ A floating assistant (bottom-right, every page) consults visitors, answers FAQs
 from the site's own facts, and routes serious inquiries to the intake or the
 team. Powered by Google Gemini.
 
+Application submissions are saved to two Notion data sources (investors and
+founders). Founder pitch decks use a temporary private Vercel Blob upload before
+being attached to Notion. Setup is documented in [NOTION_SETUP.md](NOTION_SETUP.md).
+
 ### Setup
 
 ```bash

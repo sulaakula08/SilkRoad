@@ -6,9 +6,12 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "notion:setup": "node scripts/setup-notion.mjs",
+    "test": "node --test",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@vercel/blob": "^2.6.1",
     "framer-motion": "^11.15.0",
     "jszip": "^3.10.1",
     "pdfjs-dist": "^4.10.38",
