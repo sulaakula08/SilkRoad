@@ -13,6 +13,7 @@ export function Footer() {
     [t.club.title, '#club'],
     [t.ecosystem.title, '#ecosystem'],
     [t.portfolio.title, '#portfolio'],
+    [t.jobs.title, '#jobs'],
     [t.faq.title, '#faq'],
   ]
 

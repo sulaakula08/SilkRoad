@@ -10,6 +10,7 @@ import { Radar } from './sections/Radar'
 import { TrackRecord } from './sections/TrackRecord'
 import { Team } from './sections/Team'
 import { Portfolio } from './sections/Portfolio'
+import { Jobs } from './sections/Jobs'
 import { Apply, ApplyPage } from './sections/Apply'
 import { Faq } from './sections/Faq'
 import { Footer } from './sections/Footer'
@@ -30,6 +31,7 @@ function Home() {
       <Radar />
       <Team />
       <Portfolio />
+      <Jobs />
       <Apply />
       <Faq />
       <Footer />

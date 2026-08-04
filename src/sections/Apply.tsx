@@ -13,7 +13,7 @@ export function Apply() {
     <section id="apply" className="scroll-mt-20 border-b border-rule py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-6 sm:px-8">
         <Reveal>
-          <Index n="08" label={t.apply.title} />
+          <Index n="09" label={t.apply.title} />
         </Reveal>
 
         <div className="mt-10 grid gap-12 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16">

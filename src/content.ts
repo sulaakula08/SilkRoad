@@ -158,6 +158,14 @@ export type Dict = {
     readMore: string
     showLess: string
   }
+  jobs: {
+    title: string
+    subtitle: string
+    openRoles: string
+    viewRoles: string
+    featured: string
+    note: string
+  }
   apply: {
     title: string
     subtitle: string
@@ -402,6 +410,15 @@ export const CONTENT: Record<'ru' | 'en', Dict> = {
       readMore: 'Показать все компании',
       showLess: 'Свернуть',
     },
+    jobs: {
+      title: 'Вакансии в портфельных компаниях',
+      subtitle:
+        'Компании из нашего портфеля нанимают. Позиции и счётчики подтягиваются напрямую с их карьерных площадок — мы ничего не редактируем вручную.',
+      openRoles: 'открытых вакансий',
+      viewRoles: 'Смотреть вакансии',
+      featured: 'Свежие позиции',
+      note: 'Цифры загружаются в реальном времени там, где карьерная площадка компании отдаёт публичные данные; у остальных мы даём прямую ссылку без счётчика, чтобы не показывать устаревшее число. Отклик и весь наём — на стороне компании.',
+    },
     apply: {
       title: 'Подать заявку',
       subtitle: 'Несколько базовых вопросов. Ответим в течение 3 рабочих дней.',
@@ -625,6 +642,15 @@ export const CONTENT: Record<'ru' | 'en', Dict> = {
       visit: 'Visit',
       readMore: 'Show all companies',
       showLess: 'Show less',
+    },
+    jobs: {
+      title: 'Jobs at portfolio companies',
+      subtitle:
+        'Companies from our portfolio are hiring. Roles and counts load straight from their own job boards — nothing here is hand-edited.',
+      openRoles: 'open roles',
+      viewRoles: 'View roles',
+      featured: 'Latest roles',
+      note: 'Counts load in real time where the company job board exposes public data; the rest get a direct link with no number, rather than a hand-counted figure that would go stale. Applications and hiring happen on the company side.',
     },
     apply: {
       title: 'Apply',

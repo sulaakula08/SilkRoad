@@ -14,7 +14,7 @@ export function Faq() {
         <div className="grid gap-14 lg:grid-cols-[0.8fr_1.2fr] lg:gap-20">
           <div>
             <Reveal>
-              <Index n="09" label={t.faq.title} />
+              <Index n="10" label={t.faq.title} />
             </Reveal>
             <Reveal>
               <h2 className="mt-8 font-display text-[2.4rem] leading-[1.08] font-semibold tracking-[-0.025em] text-balance sm:text-h3">
