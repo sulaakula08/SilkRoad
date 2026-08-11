@@ -1,5 +1,6 @@
 import { readJsonBody, sendJson } from '../server/http.js'
 import { cleanupDeckBlob, normalizeSubmission, saveApplication, SubmissionError } from '../server/notion.js'
+import { notifyApplicationSubmitted } from '../server/notifications/application-submitted.js'
 
 async function bestEffortCleanup(url) {
   try {
@@ -28,8 +29,11 @@ export async function submissionsHandler(req, res) {
   try {
     const application = normalizeSubmission(body)
     const saved = await saveApplication(application)
-    await bestEffortCleanup(saved?.deckBlobUrl)
-    return sendJson(res, 201, { ok: true, pageId: saved?.page?.id || saved?.id || null })
+    await Promise.all([
+      bestEffortCleanup(saved.deckBlobUrl),
+      notifyApplicationSubmitted(application, saved.page.url),
+    ])
+    return sendJson(res, 201, { ok: true, pageId: saved.page.id })
   } catch (error) {
     await bestEffortCleanup(blobUrl)
     console.error('Notion submission failed:', error?.message || error)

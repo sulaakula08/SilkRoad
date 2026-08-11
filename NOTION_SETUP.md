@@ -87,9 +87,25 @@ NOTION_TOKEN=...
 NOTION_INVESTORS_DATA_SOURCE_ID=...
 NOTION_FOUNDERS_DATA_SOURCE_ID=...
 BLOB_READ_WRITE_TOKEN=...
+TELEGRAM_BOT_TOKEN=...
+TELEGRAM_CHAT_ID=...
 ```
 
 `NOTION_PARENT_PAGE_ID` is only needed by the one-time setup script.
+
+## 5. Enable Telegram submission notifications
+
+Create a Telegram bot, add it to the team group, and give it permission to send
+messages. Set `TELEGRAM_BOT_TOKEN` to the token issued for the bot and
+`TELEGRAM_CHAT_ID` to the destination group ID.
+
+Set both variables in every environment that should send notifications,
+including local and Vercel preview environments used for testing. If either is
+missing, application storage continues without Telegram. A Telegram failure is
+logged but never changes the successful response shown to the applicant.
+
+Notifications are emitted only by successful website submissions. Manual
+Notion edits do not trigger them.
 
 The website only shows a success state after Notion confirms page creation. If
 AI screening fails, the founder application is still saved and its page is

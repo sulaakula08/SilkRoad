@@ -313,7 +313,7 @@ export async function saveApplication(application) {
   if (application.type === 'investor') {
     const dataSourceId = process.env.NOTION_INVESTORS_DATA_SOURCE_ID
     if (!dataSourceId) throw new SubmissionError('Investor database is not configured.', 503, 'CONFIGURATION_ERROR')
-    return notionRequest('/pages', {
+    const page = await notionRequest('/pages', {
       method: 'POST',
       body: {
         parent: { type: 'data_source_id', data_source_id: dataSourceId },
@@ -329,6 +329,7 @@ export async function saveApplication(application) {
         },
       },
     })
+    return { page, deckBlobUrl: null }
   }
 
   const dataSourceId = process.env.NOTION_FOUNDERS_DATA_SOURCE_ID

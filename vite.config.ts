@@ -17,6 +17,8 @@ function serverApi(env: Record<string, string>): PluginOption {
   process.env.NOTION_INVESTORS_DATA_SOURCE_ID ||= env.NOTION_INVESTORS_DATA_SOURCE_ID || ''
   process.env.NOTION_FOUNDERS_DATA_SOURCE_ID ||= env.NOTION_FOUNDERS_DATA_SOURCE_ID || ''
   process.env.BLOB_READ_WRITE_TOKEN ||= env.BLOB_READ_WRITE_TOKEN || ''
+  process.env.TELEGRAM_BOT_TOKEN ||= env.TELEGRAM_BOT_TOKEN || ''
+  process.env.TELEGRAM_CHAT_ID ||= env.TELEGRAM_CHAT_ID || ''
 
   return {
     name: 'silkroad-server-api',
