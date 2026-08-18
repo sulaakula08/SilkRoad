@@ -1,5 +1,5 @@
 /**
- * Server-side Gemini proxy.
+ * Server-side Claude (Anthropic) proxy.
  *
  * Why this exists: the site is a static bundle. Any API key placed in client
  * code ships to every visitor. So the browser talks to THIS endpoint, and only
@@ -15,7 +15,8 @@
  * and it stays here.
  */
 
-const MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash'
+const MODEL = process.env.ANTHROPIC_MODEL || 'claude-opus-5'
+const API_URL = 'https://api.anthropic.com/v1/messages'
 
 // Guard the public endpoint against obvious abuse. The key is server-side, but
 // the URL is not — anyone can POST to it, so cap what we forward upstream.
@@ -43,17 +44,17 @@ function readBody(req) {
   })
 }
 
-/** Coerce the client's messages into Gemini's `contents` shape, safely. */
-function toContents(messages) {
+/** Coerce the client's messages into Anthropic's `messages` shape, safely. */
+function toMessages(messages) {
   if (!Array.isArray(messages)) return []
   return messages
     .filter((m) => m && (m.role === 'user' || m.role === 'assistant'))
     .slice(-MAX_MESSAGES)
     .map((m) => ({
-      role: m.role === 'assistant' ? 'model' : 'user',
-      parts: [{ text: String(m.content ?? '').slice(0, MAX_CHARS) }],
+      role: m.role === 'assistant' ? 'assistant' : 'user',
+      content: String(m.content ?? '').slice(0, MAX_CHARS),
     }))
-    .filter((c) => c.parts[0].text.trim().length > 0)
+    .filter((m) => m.content.trim().length > 0)
 }
 
 export async function chatHandler(req, res) {
@@ -63,14 +64,14 @@ export async function chatHandler(req, res) {
     return res.end(JSON.stringify({ error: 'Method not allowed' }))
   }
 
-  const key = process.env.GEMINI_API_KEY
+  const key = process.env.ANTHROPIC_API_KEY
   if (!key) {
     res.statusCode = 500
     res.setHeader('Content-Type', 'application/json')
     return res.end(
       JSON.stringify({
         error:
-          'The assistant is not configured. Set GEMINI_API_KEY in .env.local (dev) or your host’s environment (prod).',
+          'The assistant is not configured. Set ANTHROPIC_API_KEY in .env.local (dev) or your host’s environment (prod).',
       }),
     )
   }
@@ -84,46 +85,34 @@ export async function chatHandler(req, res) {
     return res.end(JSON.stringify({ error: 'Bad request body.' }))
   }
 
-  const contents = toContents(body.messages)
+  const messages = toMessages(body.messages)
   const system = typeof body.system === 'string' ? body.system : undefined
-  if (contents.length === 0) {
+  if (messages.length === 0) {
     res.statusCode = 400
     res.setHeader('Content-Type', 'application/json')
     return res.end(JSON.stringify({ error: 'No message to answer.' }))
   }
 
-  // Both the classic AI Studio key ("AIza…") and the newer format ("AQ.…")
-  // authenticate as API keys via this header. (Bearer is only for OAuth access
-  // tokens, which these are not.)
-  const headers = { 'Content-Type': 'application/json', 'x-goog-api-key': key }
-
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:streamGenerateContent?alt=sse`
-
   const payload = {
-    contents,
-    systemInstruction: system ? { parts: [{ text: system }] } : undefined,
-    generationConfig: {
-      temperature: 0.6,
-      maxOutputTokens: MAX_OUTPUT_TOKENS,
-      // Gemini 2.5+ flash models "think" before answering, which for a FAQ bot
-      // just burns latency and the token budget (leaving replies empty). Turn it
-      // off for fast, direct answers. Supported on 2.5-flash; some models ignore
-      // or reject it — override GEMINI_MODEL and this together if you change it.
-      thinkingConfig: { thinkingBudget: 0 },
-    },
-    safetySettings: [
-      'HARM_CATEGORY_HARASSMENT',
-      'HARM_CATEGORY_HATE_SPEECH',
-      'HARM_CATEGORY_SEXUALLY_EXPLICIT',
-      'HARM_CATEGORY_DANGEROUS_CONTENT',
-    ].map((category) => ({ category, threshold: 'BLOCK_ONLY_HIGH' })),
+    model: MODEL,
+    max_tokens: MAX_OUTPUT_TOKENS,
+    // A FAQ bot wants fast, direct answers, not a chain of thought — disabling
+    // thinking keeps latency and the token budget down.
+    thinking: { type: 'disabled' },
+    stream: true,
+    ...(system ? { system } : {}),
+    messages,
   }
 
   let upstream
   try {
-    upstream = await fetch(url, {
+    upstream = await fetch(API_URL, {
       method: 'POST',
-      headers,
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': key,
+        'anthropic-version': '2023-06-01',
+      },
       body: JSON.stringify(payload),
     })
   } catch {
@@ -136,20 +125,20 @@ export async function chatHandler(req, res) {
     const detail = await upstream.text().catch(() => '')
     res.statusCode = upstream.status === 429 ? 429 : 502
     res.setHeader('Content-Type', 'application/json')
-    // Surface a useful hint for the two most common misconfigurations.
     let msg = 'The model returned an error.'
-    if (upstream.status === 400 && /API key not valid/i.test(detail))
-      msg = 'The Gemini API key is not valid. Check GEMINI_API_KEY.'
-    else if (upstream.status === 401 || upstream.status === 403)
-      msg = 'The Gemini key was rejected (unauthorized). Check the key and its permissions.'
-    else if (upstream.status === 404 && /no longer available|not found/i.test(detail))
-      msg = `Model "${MODEL}" isn’t available. Set GEMINI_MODEL to a current one (e.g. gemini-flash-latest).`
+    if (upstream.status === 401 || upstream.status === 403)
+      msg = 'The Anthropic API key was rejected. Check ANTHROPIC_API_KEY.'
+    else if (upstream.status === 404)
+      msg = `Model "${MODEL}" isn’t available. Set ANTHROPIC_MODEL to a current one (e.g. claude-opus-5).`
+    else if (upstream.status === 400 && /credit|billing/i.test(detail))
+      msg = 'The Anthropic account has no available credit.'
     else if (upstream.status === 429)
       msg = 'The assistant is over its rate limit right now. Try again in a moment.'
     return res.end(JSON.stringify({ error: msg }))
   }
 
-  // Stream: relay text deltas to the client as our own SSE.
+  // Stream: relay Claude's text deltas to the client as our own SSE, so the
+  // existing client (src/chat/useChat.ts) stays unchanged.
   res.statusCode = 200
   res.setHeader('Content-Type', 'text/event-stream; charset=utf-8')
   res.setHeader('Cache-Control', 'no-cache, no-transform')
@@ -171,11 +160,13 @@ export async function chatHandler(req, res) {
         const json = trimmed.slice(5).trim()
         if (!json || json === '[DONE]') continue
         try {
-          const parsed = JSON.parse(json)
-          const parts = parsed?.candidates?.[0]?.content?.parts
-          if (Array.isArray(parts)) {
-            const text = parts.map((p) => p.text || '').join('')
-            if (text) send({ text })
+          const evt = JSON.parse(json)
+          if (evt.type === 'content_block_delta' && evt.delta?.type === 'text_delta') {
+            if (evt.delta.text) send({ text: evt.delta.text })
+          } else if (evt.type === 'message_delta' && evt.delta?.stop_reason === 'refusal') {
+            send({ text: '\n\n(The assistant declined to continue that reply.)' })
+          } else if (evt.type === 'error') {
+            send({ error: 'The reply was interrupted.' })
           }
         } catch {
           // partial / unparseable chunk — ignore; the next flush completes it

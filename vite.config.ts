@@ -10,8 +10,9 @@ import tailwindcss from '@tailwindcss/vite'
  */
 function serverApi(env: Record<string, string>): PluginOption {
   // Make the server-side vars visible to the handlers via process.env.
-  process.env.GEMINI_API_KEY ||= env.GEMINI_API_KEY || ''
-  process.env.GEMINI_MODEL ||= env.GEMINI_MODEL || ''
+  process.env.ANTHROPIC_API_KEY ||= env.ANTHROPIC_API_KEY || ''
+  process.env.ANTHROPIC_MODEL ||= env.ANTHROPIC_MODEL || ''
+  process.env.ANTHROPIC_SCREEN_MODEL ||= env.ANTHROPIC_SCREEN_MODEL || ''
   process.env.NOTION_TOKEN ||= env.NOTION_TOKEN || ''
   process.env.NOTION_INVESTORS_DATA_SOURCE_ID ||= env.NOTION_INVESTORS_DATA_SOURCE_ID || ''
   process.env.NOTION_FOUNDERS_DATA_SOURCE_ID ||= env.NOTION_FOUNDERS_DATA_SOURCE_ID || ''

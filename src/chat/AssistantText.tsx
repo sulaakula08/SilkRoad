@@ -4,7 +4,7 @@ import { Fragment, type ReactNode } from 'react'
  * Renders the model's plain-text reply safely. No dangerouslySetInnerHTML —
  * everything is React nodes, so nothing the model emits can inject markup.
  *
- * Handles the small set of things Gemini actually produces here:
+ * Handles the small set of things the assistant actually produces here:
  *   • paragraphs and single line breaks
  *   • - / • bullet lines
  *   • **bold**

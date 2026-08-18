@@ -2,7 +2,7 @@
  * The assistant's grounding.
  *
  * Facts transcribed from the Silkroad Angels Club site content (src/content.ts).
- * Sent as Gemini's systemInstruction from the server. Keep it in sync with the
+ * Sent as Claude's system prompt from the server. Keep it in sync with the
  * page — the bot must never contradict what a visitor is reading.
  */
 export const SYSTEM_PROMPT = `

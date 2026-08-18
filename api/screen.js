@@ -1,17 +1,19 @@
 /**
  * AI screening for startup applications.
  *
- * Takes a founder submission and asks Gemini to return a STRUCTURED verdict:
- * auto-tagged sectors, normalized stage, an investability score, strengths,
- * risks/flags, matched investor theses, and a recommended track. Uses Gemini's
- * JSON mode (responseSchema) so the shape is guaranteed — no fragile parsing.
+ * Takes a founder submission and asks Claude to return a STRUCTURED verdict:
+ * auto-tagged sectors, normalized stage, an investability score, a readiness
+ * verdict, strengths, concrete improvement advice, and matched investor theses.
+ * Uses Claude's structured outputs (json_schema) so the shape is guaranteed —
+ * no fragile parsing.
  *
  * Same deployment story as api/chat.js: the API key lives here, server-side,
  * never in the browser. Node (req,res) handler → Vite middleware in dev, Vercel
  * function in prod.
  */
 
-const MODEL = process.env.GEMINI_SCREEN_MODEL || process.env.GEMINI_MODEL || 'gemini-2.5-flash'
+const MODEL = process.env.ANTHROPIC_SCREEN_MODEL || process.env.ANTHROPIC_MODEL || 'claude-opus-5'
+const API_URL = 'https://api.anthropic.com/v1/messages'
 
 const SECTORS = [
   'AI & infrastructure',
@@ -53,6 +55,7 @@ const SCHEMA = {
     matchedTheses: { type: 'array', items: { type: 'string', enum: THESES }, description: 'Investor theses this fits' },
   },
   required: ['sectors', 'stage', 'score', 'verdict', 'summary', 'strengths', 'flags', 'matchedTheses'],
+  additionalProperties: false,
 }
 
 function readBody(req) {
@@ -83,10 +86,10 @@ export async function screenHandler(req, res) {
     return res.end(JSON.stringify({ error: 'Method not allowed' }))
   }
 
-  const key = process.env.GEMINI_API_KEY
+  const key = process.env.ANTHROPIC_API_KEY
   if (!key) {
     res.statusCode = 500
-    return res.end(JSON.stringify({ error: 'Screening is not configured (GEMINI_API_KEY missing).' }))
+    return res.end(JSON.stringify({ error: 'Screening is not configured (ANTHROPIC_API_KEY missing).' }))
   }
 
   let body
@@ -132,8 +135,15 @@ score modest; do not reward vagueness.
 
 Scoring (0–100) reflects fit + potential for an early-stage SV angel:
   80–100 strong · 60–79 promising · 40–59 early · 0–39 weak.
+The "verdict" is the readiness call: strong = ready to raise, promising =
+almost there, early = too early, weak = not ready. Pick it honestly from the
+evidence — it, plus "summary", is the founder's "are we ready or not" answer.
 
-"flags" is advice shown to the founder under the heading "What you should
+"summary" is ONE sentence that states plainly whether the startup is
+investable-ready yet and why (e.g. "Ready — clear traction and a focused team"
+or "Not yet — an idea without validation or a team").
+
+"flags" is the improvement advice shown under the heading "What you should
 improve". Each item must be actionable and specific — name the thing to fix,
 add or prove (e.g. "Show traction: users, revenue or pilots"), never a bare
 verdict like "too early" or "not enough information".
@@ -143,23 +153,23 @@ Write summary, strengths and flags in ${lang}. Keep every string tight
 `.trim()
 
   const payload = {
-    systemInstruction: { parts: [{ text: system }] },
-    contents: [{ role: 'user', parts: [{ text: `APPLICATION\n${application}` }] }],
-    generationConfig: {
-      temperature: 0.3,
-      maxOutputTokens: 900,
-      responseMimeType: 'application/json',
-      responseSchema: SCHEMA,
-      thinkingConfig: { thinkingBudget: 0 },
-    },
+    model: MODEL,
+    max_tokens: 1200,
+    thinking: { type: 'disabled' },
+    output_config: { format: { type: 'json_schema', schema: SCHEMA } },
+    system,
+    messages: [{ role: 'user', content: `APPLICATION\n${application}` }],
   }
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`
   let up
   try {
-    up = await fetch(url, {
+    up = await fetch(API_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': key,
+        'anthropic-version': '2023-06-01',
+      },
       body: JSON.stringify(payload),
     })
   } catch {
@@ -171,15 +181,16 @@ Write summary, strengths and flags in ${lang}. Keep every string tight
   if (!up.ok) {
     const detail = data?.error?.message || ''
     let msg = 'The screening model returned an error.'
-    if (up.status === 400 && /API key not valid/i.test(detail)) msg = 'The Gemini API key is not valid.'
-    else if (up.status === 401 || up.status === 403) msg = 'The Gemini key was rejected (unauthorized).'
-    else if (up.status === 404) msg = `Model "${MODEL}" is unavailable. Set GEMINI_MODEL.`
+    if (up.status === 401 || up.status === 403) msg = 'The Anthropic API key was rejected.'
+    else if (up.status === 404) msg = `Model "${MODEL}" is unavailable. Set ANTHROPIC_MODEL.`
+    else if (up.status === 400 && /credit|billing/i.test(detail)) msg = 'The Anthropic account has no available credit.'
     else if (up.status === 429) msg = 'Rate limited — try again in a moment.'
     res.statusCode = up.status === 429 ? 429 : 502
     return res.end(JSON.stringify({ error: msg }))
   }
 
-  const text = data?.candidates?.[0]?.content?.parts?.map((p) => p.text || '').join('') || ''
+  const text =
+    (Array.isArray(data?.content) ? data.content.find((b) => b?.type === 'text')?.text : '') || ''
   let result
   try {
     result = JSON.parse(text)

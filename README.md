@@ -132,7 +132,7 @@ artwork rather than redrawn:
 
 A floating assistant (bottom-right, every page) consults visitors, answers FAQs
 from the site's own facts, and routes serious inquiries to the intake or the
-team. Powered by Google Gemini.
+team. Powered by Claude (Anthropic).
 
 Application submissions are saved to two Notion data sources (investors and
 founders). Founder pitch decks use a temporary private Vercel Blob upload before
@@ -142,12 +142,13 @@ being attached to Notion. Setup is documented in [NOTION_SETUP.md](NOTION_SETUP.
 
 ```bash
 cp .env.example .env.local
-# put your key in .env.local — get one at https://aistudio.google.com/apikey
+# put your key in .env.local — get one at https://console.anthropic.com/settings/keys
 npm run dev
 ```
 
-The key **must** be an AI Studio API key (it starts with `AIza`). It is read
-only by the server-side proxy and is never sent to the browser.
+The key **must** be an Anthropic API key (it starts with `sk-ant-`). It is read
+only by the server-side proxies (`api/chat.js`, `api/screen.js`) and is never
+sent to the browser.
 
 ### How it's wired (and why)
 
@@ -156,7 +157,8 @@ visitor. Instead:
 
 | Piece | Role |
 | --- | --- |
-| `api/chat.js` | Server-side proxy. Holds the key, calls Gemini, streams the reply back as SSE. Runs as a Vercel Node function in prod, and as Vite middleware in dev (`vite.config.ts`) — same file both ways. |
+| `api/chat.js` | Server-side proxy. Holds the key, calls Claude, streams the reply back as SSE. Runs as a Vercel Node function in prod, and as Vite middleware in dev (`vite.config.ts`) — same file both ways. |
+| `api/screen.js` | Server-side founder-application screener. Calls Claude with structured outputs (`json_schema`) for a guaranteed verdict shape. |
 | `src/chat/knowledge.ts` | The system prompt — everything the bot may state as fact, transcribed from the site. **Keep it in sync with the sections and `routing.ts`.** |
 | `src/chat/useChat.ts` | Client hook: posts the transcript, reads the SSE stream token by token. |
 | `src/chat/ChatWidget.tsx` | The launcher + panel. |
@@ -176,7 +178,7 @@ routing works even if a visitor never types.
 ### Deploy
 
 `vercel.json` rewrites all non-`/api` routes to `index.html` (SPA) and lets
-Vercel serve `api/chat.js` as a function. Set `GEMINI_API_KEY` in the host's
+Vercel serve `api/chat.js` as a function. Set `ANTHROPIC_API_KEY` in the host's
 environment — never in the repo. Any host with Node serverless functions works;
 the proxy is a plain `(req, res)` handler.
 

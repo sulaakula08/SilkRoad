@@ -22,7 +22,7 @@ type Phase = 'form' | 'screening' | 'sent'
  * The intake. Two tabs — investor / founder — with only the basics.
  *
  * Founder submissions are AI-screened: on submit we POST to /api/screen, which
- * asks Gemini to auto-tag sector + stage, score investability, surface
+ * asks Claude to auto-tag sector + stage, score investability, surface
  * strengths/flags and match the club's theses. The founder sees the pre-screen
  * instantly; a partner still reviews every application.
  *
