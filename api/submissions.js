@@ -1,6 +1,7 @@
 import { readJsonBody, sendJson } from '../server/http.js'
 import { cleanupDeckBlob, normalizeSubmission, saveApplication, SubmissionError } from '../server/notion.js'
 import { notifyApplicationSubmitted } from '../server/notifications/application-submitted.js'
+import { notifyFounderFollowUp } from '../server/notifications/founder-follow-up.js'
 
 async function bestEffortCleanup(url) {
   try {
@@ -32,6 +33,7 @@ export async function submissionsHandler(req, res) {
     await Promise.all([
       bestEffortCleanup(saved.deckBlobUrl),
       notifyApplicationSubmitted(application, saved.page.url),
+      notifyFounderFollowUp(application),
     ])
     return sendJson(res, 201, { ok: true, pageId: saved.page.id })
   } catch (error) {

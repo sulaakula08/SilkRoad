@@ -5,7 +5,7 @@ import tailwindcss from '@tailwindcss/vite'
 /**
  * Dev-only: mount the same /api/chat handler used in production as Vite
  * middleware, so `npm run dev` exercises the real proxy. The key is read from
- * .env.local into process.env here (server side) — it is never exposed to the
+ * Vite's .env files into process.env here (server side) — it is never exposed to the
  * client, because it is not prefixed VITE_ and only this Node code reads it.
  */
 function serverApi(env: Record<string, string>): PluginOption {
@@ -19,6 +19,8 @@ function serverApi(env: Record<string, string>): PluginOption {
   process.env.BLOB_READ_WRITE_TOKEN ||= env.BLOB_READ_WRITE_TOKEN || ''
   process.env.TELEGRAM_BOT_TOKEN ||= env.TELEGRAM_BOT_TOKEN || ''
   process.env.TELEGRAM_CHAT_ID ||= env.TELEGRAM_CHAT_ID || ''
+  process.env.RESEND_API_KEY ||= env.RESEND_API_KEY || ''
+  process.env.APPLICATION_EMAIL_FROM ||= env.APPLICATION_EMAIL_FROM || ''
 
   return {
     name: 'silkroad-server-api',

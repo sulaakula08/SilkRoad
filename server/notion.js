@@ -93,6 +93,7 @@ function normalizeScreening(value) {
   if (!verdict) return null
   const list = (items, maxItems) =>
     (Array.isArray(items) ? items : []).map((item) => clean(item, 500)).filter(Boolean).slice(0, maxItems)
+  const missingItems = list(value.missingItems, 5)
   return {
     score,
     verdict,
@@ -102,6 +103,8 @@ function normalizeScreening(value) {
     strengths: list(value.strengths, 3),
     flags: list(value.flags, 3),
     matchedTheses: list(value.matchedTheses, 4),
+    missingItems,
+    needsFollowUp: Boolean(value.needsFollowUp && missingItems.length),
   }
 }
 

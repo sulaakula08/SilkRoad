@@ -1,16 +1,6 @@
 import { motion } from 'framer-motion'
 import { useI18n } from '../i18n'
-
-export type Screening = {
-  sectors: string[]
-  stage: string
-  score: number
-  verdict: 'strong' | 'promising' | 'early' | 'weak'
-  summary: string
-  strengths: string[]
-  flags: string[]
-  matchedTheses: string[]
-}
+import type { ScreeningResultData } from './screening'
 
 const EASE = [0.16, 1, 0.3, 1] as const
 
@@ -75,7 +65,7 @@ export function ScreeningResult({
   onReset,
   resetLabel,
 }: {
-  data: Screening
+  data: ScreeningResultData
   onReset: () => void
   resetLabel: string
 }) {

@@ -2,7 +2,8 @@ import { useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import { useI18n } from '../i18n'
 import { ArrowUpRight } from '../components/ui'
-import { ScreeningResult, type Screening } from './ScreeningResult'
+import { ScreeningResult } from './ScreeningResult'
+import type { Screening } from './screening'
 import { submitApplication } from './submitApplication'
 
 // Deck upload accepts PDF/PPTX. The extractor (pdf.js + jszip) is heavy, so it's

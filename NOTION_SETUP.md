@@ -9,7 +9,7 @@ Create an internal Notion integration with **Read content**, **Insert content**,
 and **Update content** capabilities. Create or choose a parent Notion page and
 share that page with the integration.
 
-Put these values in `.env.local`:
+Put these values in `.env`:
 
 ```dotenv
 NOTION_TOKEN=ntn_...
@@ -31,7 +31,7 @@ It creates:
 - `Silkroad — Investor Applications`
 - `Silkroad — Founder Applications`
 
-The command prints two data-source IDs. Add them to `.env.local` and the Vercel
+The command prints two data-source IDs. Add them to `.env` and the Vercel
 project environment:
 
 ```dotenv
@@ -70,7 +70,7 @@ In the same Vercel project:
 3. Connect it to every environment used by the site.
 
 Vercel adds `BLOB_READ_WRITE_TOKEN` automatically. For local testing, pull the
-project environment or copy that token into `.env.local`.
+project environment or copy that token into `.env`.
 
 Decks are uploaded directly from the browser to private Blob storage, then the
 serverless submission function transfers them to Notion. The temporary Blob is
@@ -89,6 +89,8 @@ NOTION_FOUNDERS_DATA_SOURCE_ID=...
 BLOB_READ_WRITE_TOKEN=...
 TELEGRAM_BOT_TOKEN=...
 TELEGRAM_CHAT_ID=...
+RESEND_API_KEY=...
+APPLICATION_EMAIL_FROM="Silkroad Angels <applications@your-domain.com>"
 ```
 
 `NOTION_PARENT_PAGE_ID` is only needed by the one-time setup script.
@@ -106,6 +108,18 @@ logged but never changes the successful response shown to the applicant.
 
 Notifications are emitted only by successful website submissions. Manual
 Notion edits do not trigger them.
+
+## 6. Enable founder follow-up emails
+
+Create a Resend account, verify the sending domain, and configure
+`RESEND_API_KEY` and `APPLICATION_EMAIL_FROM` in every environment that should
+send founder emails. Use a sender address that receives replies.
+
+After a founder application is saved, Claude checks the submitted information
+against the investment-review rubric. If material information is missing, the
+founder receives a short bilingual follow-up asking them to reply with those
+details. Complete applications receive no email. Delivery failure is logged
+but never changes the successful application response.
 
 The website only shows a success state after Notion confirms page creation. If
 AI screening fails, the founder application is still saved and its page is

@@ -1,5 +1,5 @@
 import type { PutBlobResult } from '@vercel/blob'
-import type { Screening } from './ScreeningResult'
+import type { Screening } from './screening'
 
 type ApplicationTab = 'investor' | 'founder'
 type Values = Record<string, string>

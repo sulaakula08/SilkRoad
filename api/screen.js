@@ -53,8 +53,28 @@ const SCHEMA = {
       description: '1–3 concrete, actionable things the founder should improve, requested language',
     },
     matchedTheses: { type: 'array', items: { type: 'string', enum: THESES }, description: 'Investor theses this fits' },
+    needsFollowUp: {
+      type: 'boolean',
+      description: 'Whether material information is missing for an informed investment review',
+    },
+    missingItems: {
+      type: 'array',
+      items: { type: 'string' },
+      description: 'Up to 5 concise requests for material missing information, requested language',
+    },
   },
-  required: ['sectors', 'stage', 'score', 'verdict', 'summary', 'strengths', 'flags', 'matchedTheses'],
+  required: [
+    'sectors',
+    'stage',
+    'score',
+    'verdict',
+    'summary',
+    'strengths',
+    'flags',
+    'matchedTheses',
+    'needsFollowUp',
+    'missingItems',
+  ],
   additionalProperties: false,
 }
 
@@ -148,6 +168,26 @@ improve". Each item must be actionable and specific — name the thing to fix,
 add or prove (e.g. "Show traction: users, revenue or pilots"), never a bare
 verdict like "too early" or "not enough information".
 
+Separately, decide whether the team needs material follow-up information before
+it can make an informed investment review. Check the available application
+against this fixed rubric:
+  - company purpose, customer problem and target customer
+  - product / solution and current product status
+  - market opportunity and why now
+  - business model
+  - traction, or stage-appropriate validation for an idea-stage company
+  - founding team and relevant experience / advantage
+  - competitors / alternatives and differentiation
+  - funding ask, use of funds and next milestones
+
+Be stage-aware: do not ask an idea-stage company for revenue it cannot yet have;
+ask for validation evidence or planned milestones instead. Set needsFollowUp to
+true only when decision-relevant information from that rubric is absent or too
+vague. missingItems must then contain 1–5 concise, specific requests in
+${lang}. Do not repeat information already supplied, request a deck/file, or
+comment on whether a deck URL or file could be accessed. If the information is
+sufficient, set needsFollowUp to false and missingItems to [].
+
 Write summary, strengths and flags in ${lang}. Keep every string tight
 (strengths/flags: max ~12 words each). Return ONLY the JSON object.
 `.trim()
@@ -207,6 +247,11 @@ Write summary, strengths and flags in ${lang}. Keep every string tight
   result.matchedTheses = (result.matchedTheses || []).filter((x) => THESES.includes(x)).slice(0, 4)
   result.strengths = (result.strengths || []).slice(0, 3)
   result.flags = (result.flags || []).slice(0, 3)
+  result.missingItems = (result.missingItems || [])
+    .map((item) => clean(item, 500).trim())
+    .filter(Boolean)
+    .slice(0, 5)
+  result.needsFollowUp = Boolean(result.needsFollowUp && result.missingItems.length)
 
   res.statusCode = 200
   res.end(JSON.stringify({ result }))
