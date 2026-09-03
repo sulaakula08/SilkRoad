@@ -25,6 +25,25 @@ export function readJsonBody(req, maxBytes = 100_000) {
   })
 }
 
+export function readRawBody(req, maxBytes = 1_000_000) {
+  return new Promise((resolve, reject) => {
+    const chunks = []
+    let bytes = 0
+    req.on('data', (chunk) => {
+      const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk)
+      bytes += buffer.byteLength
+      if (bytes > maxBytes) {
+        reject(Object.assign(new Error('payload too large'), { statusCode: 413 }))
+        req.destroy()
+        return
+      }
+      chunks.push(buffer)
+    })
+    req.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')))
+    req.on('error', reject)
+  })
+}
+
 export function sendJson(res, statusCode, body) {
   res.statusCode = statusCode
   res.setHeader('Content-Type', 'application/json; charset=utf-8')

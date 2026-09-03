@@ -12,8 +12,9 @@
  * function in prod.
  */
 
+import { AnthropicError, requestStructuredOutput } from '../server/integrations/anthropic.js'
+
 const MODEL = process.env.ANTHROPIC_SCREEN_MODEL || process.env.ANTHROPIC_MODEL || 'claude-opus-5'
-const API_URL = 'https://api.anthropic.com/v1/messages'
 
 const SECTORS = [
   'AI & infrastructure',
@@ -192,51 +193,27 @@ Write summary, strengths and flags in ${lang}. Keep every string tight
 (strengths/flags: max ~12 words each). Return ONLY the JSON object.
 `.trim()
 
-  const payload = {
-    model: MODEL,
-    max_tokens: 1200,
-    thinking: { type: 'disabled' },
-    output_config: { format: { type: 'json_schema', schema: SCHEMA } },
-    system,
-    messages: [{ role: 'user', content: `APPLICATION\n${application}` }],
-  }
-
-  let up
-  try {
-    up = await fetch(API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': key,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify(payload),
-    })
-  } catch {
-    res.statusCode = 502
-    return res.end(JSON.stringify({ error: 'Could not reach the model.' }))
-  }
-
-  const data = await up.json().catch(() => null)
-  if (!up.ok) {
-    const detail = data?.error?.message || ''
-    let msg = 'The screening model returned an error.'
-    if (up.status === 401 || up.status === 403) msg = 'The Anthropic API key was rejected.'
-    else if (up.status === 404) msg = `Model "${MODEL}" is unavailable. Set ANTHROPIC_MODEL.`
-    else if (up.status === 400 && /credit|billing/i.test(detail)) msg = 'The Anthropic account has no available credit.'
-    else if (up.status === 429) msg = 'Rate limited — try again in a moment.'
-    res.statusCode = up.status === 429 ? 429 : 502
-    return res.end(JSON.stringify({ error: msg }))
-  }
-
-  const text =
-    (Array.isArray(data?.content) ? data.content.find((b) => b?.type === 'text')?.text : '') || ''
   let result
   try {
-    result = JSON.parse(text)
-  } catch {
-    res.statusCode = 502
-    return res.end(JSON.stringify({ error: 'The screening result could not be read.' }))
+    result = await requestStructuredOutput({
+      apiKey: key,
+      model: MODEL,
+      schema: SCHEMA,
+      system,
+      user: `APPLICATION\n${application}`,
+      maxTokens: 1200,
+    })
+  } catch (error) {
+    const status = error instanceof AnthropicError ? error.providerStatus : 0
+    const detail = error instanceof AnthropicError ? error.detail : ''
+    let msg = 'The screening model returned an error.'
+    if (status === 401 || status === 403) msg = 'The Anthropic API key was rejected.'
+    else if (status === 404) msg = `Model "${MODEL}" is unavailable. Set ANTHROPIC_MODEL.`
+    else if (status === 400 && /credit|billing/i.test(detail)) msg = 'The Anthropic account has no available credit.'
+    else if (status === 429) msg = 'Rate limited — try again in a moment.'
+    else if (error instanceof AnthropicError && !status) msg = error.message
+    res.statusCode = status === 429 ? 429 : 502
+    return res.end(JSON.stringify({ error: msg }))
   }
 
   // Clamp / sanitise before returning.

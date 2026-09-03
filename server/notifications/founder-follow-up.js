@@ -1,4 +1,5 @@
-import { sendEmail } from './email.js'
+import { createReplyAddress } from '../founder-replies/correlation.js'
+import { sendEmail } from '../integrations/resend.js'
 
 const COPY = {
   en: {
@@ -72,20 +73,31 @@ export function createFounderFollowUpEmail({ lang, name, company, email, missing
   return { to: email, subject: copy.subject(company), text, html }
 }
 
-export async function notifyFounderFollowUp(application) {
+export async function notifyFounderFollowUp(application, { pageId }) {
   const screening = application.type === 'founder' ? application.screening : null
   if (!screening?.needsFollowUp || !screening.missingItems.length) return false
 
   try {
-    return await sendEmail(
-      createFounderFollowUpEmail({
+    let replyTo
+    try {
+      replyTo = createReplyAddress(pageId)
+    } catch (error) {
+      console.warn(
+        'Founder reply automation is unavailable; sending follow-up email without reply tracking:',
+        error?.message || error,
+      )
+    }
+
+    return await sendEmail({
+      ...createFounderFollowUpEmail({
         lang: application.lang,
         name: application.name,
         company: application.company,
         email: application.email,
         missingItems: screening.missingItems,
       }),
-    )
+      ...(replyTo ? { replyTo } : {}),
+    })
   } catch (error) {
     console.warn('Could not send founder follow-up email:', error?.message || error)
     return false

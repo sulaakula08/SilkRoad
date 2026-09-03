@@ -1,7 +1,18 @@
 import { del, get, head } from '@vercel/blob'
-import { NOTION_VERSION } from './notion-schema.js'
+import { createFounderFollowUpSection } from './founder-replies/notion.js'
+import {
+  bullet,
+  divider,
+  heading,
+  labeledParagraph,
+  notionText,
+  paragraph,
+  richText,
+  textChunks as chunks,
+  title,
+} from './integrations/notion-blocks.js'
+import { NotionError, notionRequest, uploadFileToNotion } from './integrations/notion.js'
 
-const NOTION_API = 'https://api.notion.com/v1'
 const MAX_DECK_BYTES = 15 * 1024 * 1024
 const DECK_PREFIX = 'applications/decks/'
 const DECK_TYPES = new Set([
@@ -22,46 +33,6 @@ export class SubmissionError extends Error {
 }
 
 const clean = (value, max) => String(value ?? '').trim().slice(0, max)
-const chunks = (value, size = 1_900) => {
-  const text = String(value ?? '')
-  const result = []
-  for (let index = 0; index < text.length; index += size) result.push(text.slice(index, index + size))
-  return result
-}
-const notionText = (value, annotations, link) =>
-  chunks(value).map((content) => ({
-    type: 'text',
-    text: { content, ...(link ? { link: { url: link } } : {}) },
-    ...(annotations ? { annotations } : {}),
-  }))
-const propertyText = (value) => notionText(value)
-const title = (value) => ({ title: notionText(value) })
-const richText = (value) => ({ rich_text: propertyText(value) })
-const paragraph = (value) => ({
-  object: 'block',
-  type: 'paragraph',
-  paragraph: { rich_text: notionText(value) },
-})
-const heading = (value, level = 2) => ({
-  object: 'block',
-  type: `heading_${level}`,
-  [`heading_${level}`]: { rich_text: notionText(value) },
-})
-const bullet = (value) => ({
-  object: 'block',
-  type: 'bulleted_list_item',
-  bulleted_list_item: { rich_text: notionText(value) },
-})
-const labeledParagraph = (label, value) => ({
-  object: 'block',
-  type: 'paragraph',
-  paragraph: {
-    rich_text: [
-      ...notionText(`${label}: `, { bold: true, italic: false, strikethrough: false, underline: false, code: false, color: 'default' }),
-      ...notionText(value),
-    ],
-  },
-})
 
 function required(value, label, max) {
   const result = clean(value, max)
@@ -145,60 +116,6 @@ export function normalizeSubmission(body) {
   }
 }
 
-async function notionRequest(path, { method = 'GET', body } = {}) {
-  const token = process.env.NOTION_TOKEN
-  if (!token) throw new SubmissionError('Notion is not configured.', 503, 'CONFIGURATION_ERROR')
-
-  let response
-  try {
-    response = await fetch(`${NOTION_API}${path}`, {
-      method,
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Notion-Version': NOTION_VERSION,
-        ...(body ? { 'Content-Type': 'application/json' } : {}),
-      },
-      ...(body ? { body: JSON.stringify(body) } : {}),
-      signal: AbortSignal.timeout(20_000),
-    })
-  } catch {
-    throw new SubmissionError('Could not reach Notion.', 502)
-  }
-
-  const data = await response.json().catch(() => null)
-  if (!response.ok) {
-    const detail = clean(data?.message, 500)
-    throw new SubmissionError(detail || 'Notion rejected the application.', response.status >= 500 ? 502 : 500)
-  }
-  return data
-}
-
-async function sendFileToNotion(uploadId, bytes, filename, contentType) {
-  const form = new FormData()
-  form.append('file', new Blob([bytes], { type: contentType }), filename)
-
-  let response
-  try {
-    response = await fetch(`${NOTION_API}/file_uploads/${uploadId}/send`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${process.env.NOTION_TOKEN}`,
-        'Notion-Version': NOTION_VERSION,
-      },
-      body: form,
-      signal: AbortSignal.timeout(45_000),
-    })
-  } catch {
-    throw new SubmissionError('Could not upload the deck to Notion.', 502, 'DECK_UPLOAD_FAILED')
-  }
-
-  const data = await response.json().catch(() => null)
-  if (!response.ok || data?.status !== 'uploaded') {
-    throw new SubmissionError(clean(data?.message, 500) || 'Notion rejected the deck.', 500, 'DECK_UPLOAD_FAILED')
-  }
-  return data
-}
-
 function safeFilename(value, contentType) {
   const fallback = contentType === 'application/pdf' ? 'pitch-deck.pdf' : 'pitch-deck.pptx'
   const name = String(value || fallback)
@@ -245,12 +162,19 @@ async function uploadDeckToNotion(deckBlob) {
 
   const bytes = await new Response(file.stream).arrayBuffer()
   const filename = safeFilename(deckBlob.filename || metadata.pathname, metadata.contentType)
-  const upload = await notionRequest('/file_uploads', {
-    method: 'POST',
-    body: { mode: 'single_part', filename, content_type: metadata.contentType },
-  })
-  const completed = await sendFileToNotion(upload.id, bytes, filename, metadata.contentType)
-  return { id: completed.id, filename, blobUrl: url }
+  try {
+    const completed = await uploadFileToNotion({
+      bytes,
+      filename,
+      contentType: metadata.contentType,
+    })
+    return { id: completed.id, filename, blobUrl: url }
+  } catch (error) {
+    if (error instanceof NotionError) {
+      throw new SubmissionError(error.message, error.statusCode, 'DECK_UPLOAD_FAILED')
+    }
+    throw error
+  }
 }
 
 function founderBlocks(application) {
@@ -275,7 +199,7 @@ function founderBlocks(application) {
     })
   }
 
-  blocks.push({ object: 'block', type: 'divider', divider: {} }, heading('AI Screening Report'))
+  blocks.push(divider(), heading('AI Screening Report'))
   const report = application.screening
   if (!report) {
     blocks.push({
@@ -309,6 +233,9 @@ function founderBlocks(application) {
     blocks.push(heading('Thesis matches', 3), ...report.matchedTheses.map(bullet))
   }
   blocks.push(paragraph('Automated pre-screen only. A partner should review every application.'))
+  if (report.needsFollowUp) {
+    blocks.push(...createFounderFollowUpSection(report.missingItems, application.lang))
+  }
   return blocks
 }
 

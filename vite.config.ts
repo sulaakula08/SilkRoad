@@ -21,6 +21,10 @@ function serverApi(env: Record<string, string>): PluginOption {
   process.env.TELEGRAM_CHAT_ID ||= env.TELEGRAM_CHAT_ID || ''
   process.env.RESEND_API_KEY ||= env.RESEND_API_KEY || ''
   process.env.APPLICATION_EMAIL_FROM ||= env.APPLICATION_EMAIL_FROM || ''
+  process.env.FOUNDER_REPLY_EMAIL ||= env.FOUNDER_REPLY_EMAIL || ''
+  process.env.FOUNDER_REPLY_SIGNING_SECRET ||= env.FOUNDER_REPLY_SIGNING_SECRET || ''
+  process.env.RESEND_WEBHOOK_SECRET ||= env.RESEND_WEBHOOK_SECRET || ''
+  process.env.ANTHROPIC_REPLY_MODEL ||= env.ANTHROPIC_REPLY_MODEL || ''
 
   return {
     name: 'silkroad-server-api',
@@ -40,6 +44,10 @@ function serverApi(env: Record<string, string>): PluginOption {
       server.middlewares.use('/api/submissions', async (req, res) => {
         const { submissionsHandler } = await server.ssrLoadModule('/api/submissions.js')
         await submissionsHandler(req, res)
+      })
+      server.middlewares.use('/api/resend-inbound', async (req, res) => {
+        const { resendInboundHandler } = await server.ssrLoadModule('/api/resend-inbound.js')
+        await resendInboundHandler(req, res)
       })
       server.middlewares.use('/api/blob-cleanup', async (req, res) => {
         const { blobCleanupHandler } = await server.ssrLoadModule('/api/blob-cleanup.js')

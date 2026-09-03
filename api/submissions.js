@@ -33,7 +33,7 @@ export async function submissionsHandler(req, res) {
     await Promise.all([
       bestEffortCleanup(saved.deckBlobUrl),
       notifyApplicationSubmitted(application, saved.page.url),
-      notifyFounderFollowUp(application),
+      notifyFounderFollowUp(application, { pageId: saved.page.id }),
     ])
     return sendJson(res, 201, { ok: true, pageId: saved.page.id })
   } catch (error) {

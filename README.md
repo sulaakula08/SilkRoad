@@ -20,6 +20,12 @@ next i18n step.
 
 ---
 
+**Setting this up from scratch?** [SETUP.md](SETUP.md) walks through every
+service — Anthropic, Notion, Telegram, Resend, Vercel — click by click, in the
+order they have to be done.
+
+---
+
 ## The application flow
 
 Investors and founders apply through one intake that routes them to a named
@@ -137,6 +143,12 @@ team. Powered by Claude (Anthropic).
 Application submissions are saved to two Notion data sources (investors and
 founders). Founder pitch decks use a temporary private Vercel Blob upload before
 being attached to Notion. Setup is documented in [NOTION_SETUP.md](NOTION_SETUP.md).
+
+When AI screening finds decision-relevant information missing, the founder gets
+a correlated follow-up email. Verified replies from that founder are added to a
+dated **Founder follow-up** activity section in the same Notion page. PDF and
+PPTX replies are preserved and read, while the database properties remain
+unchanged. Telegram reports success only after Notion confirms the append.
 
 ### Setup
 

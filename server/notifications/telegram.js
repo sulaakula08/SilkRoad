@@ -14,9 +14,9 @@ export async function sendTelegramMessage({ text, action }) {
       chat_id: chatId,
       text,
       link_preview_options: { is_disabled: true },
-      reply_markup: {
-        inline_keyboard: [[{ text: action.label, url: action.url }]],
-      },
+      ...(action
+        ? { reply_markup: { inline_keyboard: [[{ text: action.label, url: action.url }]] } }
+        : {}),
     }),
     signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
   })
