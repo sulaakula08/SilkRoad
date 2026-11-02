@@ -58,7 +58,7 @@ export function Portfolio() {
     <section id="portfolio" className="scroll-mt-20 border-b border-rule py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-6 sm:px-8">
         <Reveal>
-          <Index n="07" label={t.portfolio.title} />
+          <Index n="06" label={t.portfolio.title} />
         </Reveal>
 
         <div className="mt-10 max-w-2xl">

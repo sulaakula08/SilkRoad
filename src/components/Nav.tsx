@@ -15,7 +15,6 @@ export function Nav() {
   const { t } = useI18n()
 
   const links = [
-    { href: '/#radar', label: t.nav.radar },
     { href: '/#calendar', label: t.nav.calendar },
     { href: '/#blog', label: t.nav.blog },
     { href: '/#footer', label: t.nav.contacts },

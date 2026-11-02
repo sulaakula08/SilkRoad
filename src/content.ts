@@ -80,34 +80,12 @@ export const PORTFOLIO: Company[] = [
 
 export type Dict = {
   nav: {
-    radar: string
     calendar: string
     blog: string
     contacts: string
     faq: string
     apply: string
     forInvestors: string
-  }
-  radar: {
-    index: string
-    label: string
-    title: string
-    subtitle: string
-    asOf: string
-    kpis: string[]
-    kpiNotes: string[]
-    countriesTitle: string
-    shareOf: string
-    noData: string
-    feedTitle: string
-    feedNote: string
-    eventsTitle: string
-    sourcesTitle: string
-    note: string
-    countries: Record<string, string>
-    sectors: Record<string, string>
-    cities: Record<string, string>
-    months: string[]
   }
   hero: {
     badge: string
@@ -228,67 +206,12 @@ const LINKEDIN = {
 export const CONTENT: Record<'ru' | 'en', Dict> = {
   ru: {
     nav: {
-      radar: 'Радар',
       calendar: 'Календарь',
       blog: 'Блог',
       contacts: 'Контакты',
       faq: 'FAQ',
       apply: 'Отправить заявку',
       forInvestors: 'Для инвесторов',
-    },
-    radar: {
-      index: '05',
-      label: 'Радар экосистемы',
-      title: 'Пульс стартапов Центральной Азии',
-      subtitle:
-        'Финансирование, сделки и события по региону — по публичным отраслевым отчётам и сообщениям в СМИ. Каждая цифра со ссылкой на источник.',
-      asOf: 'Данные за 2025 год · последняя сверка — июль 2026',
-      kpis: [
-        'Венчурный объём региона, 2025',
-        'Казахстан, 2025',
-        'Узбекистан, 2025',
-        'Доля двух мегасделок',
-      ],
-      kpiNotes: [
-        'Рекорд, RISE Research',
-        'Рост почти в 3 раза год к году',
-        'Рост в 11,3 раза с 2022 года',
-        'Higgsfield и Uzum от объёма рынка',
-      ],
-      countriesTitle: 'Финансирование по странам',
-      shareOf: 'от регионального объёма',
-      noData: 'Публичных данных нет',
-      feedTitle: 'Крупнейшие раскрытые раунды',
-      feedNote: 'Раунды, официально объявленные компаниями или подтверждённые СМИ.',
-      eventsTitle: 'Ключевые события экосистемы',
-      sourcesTitle: 'Источники',
-      note: 'Все показатели взяты из публичных источников, перечисленных выше. Это не инвестиционная рекомендация; данные обновляются вручную по мере выхода новых отчётов.',
-      countries: {
-        KZ: 'Казахстан',
-        UZ: 'Узбекистан',
-        KG: 'Кыргызстан',
-        TJ: 'Таджикистан',
-        TM: 'Туркменистан',
-      },
-      sectors: {
-        fintech: 'Финтех',
-        ai: 'ИИ',
-        health: 'Здоровье',
-        logistics: 'Логистика',
-        agri: 'Агротех',
-        ecommerce: 'E-commerce',
-        deeptech: 'Deep tech',
-        edtech: 'EdTech',
-      },
-      cities: {
-        astana: 'Астана',
-        tashkent: 'Ташкент',
-        almaty: 'Алматы',
-        bishkek: 'Бишкек',
-        paloalto: 'Пало-Альто',
-        sanfrancisco: 'Сан-Франциско',
-      },
-      months: ['янв', 'фев', 'мар', 'апр', 'мая', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'],
     },
     hero: {
       badge: 'При поддержке Silkroad Innovation Hub',
@@ -493,67 +416,12 @@ export const CONTENT: Record<'ru' | 'en', Dict> = {
 
   en: {
     nav: {
-      radar: 'Radar',
       calendar: 'Calendar',
       blog: 'Blog',
       contacts: 'Contacts',
       faq: 'FAQ',
       apply: 'Apply now',
       forInvestors: 'For investors',
-    },
-    radar: {
-      index: '05',
-      label: 'Ecosystem radar',
-      title: 'The Central Asia startup pulse',
-      subtitle:
-        'Funding, deals and events across the region — drawn from published industry reports and press coverage. Every figure is sourced.',
-      asOf: 'Full-year 2025 data · last checked July 2026',
-      kpis: [
-        'Regional VC volume, 2025',
-        'Kazakhstan, 2025',
-        'Uzbekistan, 2025',
-        'Share from two mega-deals',
-      ],
-      kpiNotes: [
-        'All-time high, RISE Research',
-        'Nearly 3x year on year',
-        '11.3x growth since 2022',
-        'Higgsfield and Uzum, of market volume',
-      ],
-      countriesTitle: 'Funding by country',
-      shareOf: 'of regional volume',
-      noData: 'No public data',
-      feedTitle: 'Largest disclosed rounds',
-      feedNote: 'Rounds announced by the companies or confirmed in the press.',
-      eventsTitle: 'Key ecosystem events',
-      sourcesTitle: 'Sources',
-      note: 'All figures come from the public sources listed above. This is not investment advice; the data is updated manually as new reports are published.',
-      countries: {
-        KZ: 'Kazakhstan',
-        UZ: 'Uzbekistan',
-        KG: 'Kyrgyzstan',
-        TJ: 'Tajikistan',
-        TM: 'Turkmenistan',
-      },
-      sectors: {
-        fintech: 'Fintech',
-        ai: 'AI',
-        health: 'HealthTech',
-        logistics: 'Logistics',
-        agri: 'AgriTech',
-        ecommerce: 'E-commerce',
-        deeptech: 'Deep tech',
-        edtech: 'EdTech',
-      },
-      cities: {
-        astana: 'Astana',
-        tashkent: 'Tashkent',
-        almaty: 'Almaty',
-        bishkek: 'Bishkek',
-        paloalto: 'Palo Alto',
-        sanfrancisco: 'San Francisco',
-      },
-      months: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
     },
     hero: {
       badge: 'Supported by Silkroad Innovation Hub',
