@@ -15,6 +15,7 @@ import { Faq } from './sections/Faq'
 import { Footer } from './sections/Footer'
 import { NavThemeProvider } from './components/navTheme'
 import { ChatWidget } from './chat/ChatWidget'
+import { AI_ENABLED } from './lib/features'
 import { ScrollTop } from './components/ScrollTop'
 import { LanguageProvider } from './i18n'
 
@@ -70,7 +71,7 @@ export default function App() {
           </Routes>
         </main>
         <ScrollTop />
-        <ChatWidget />
+        {AI_ENABLED && <ChatWidget />}
       </NavThemeProvider>
     </LanguageProvider>
   )

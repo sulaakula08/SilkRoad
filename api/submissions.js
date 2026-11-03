@@ -2,6 +2,7 @@ import { readJsonBody, sendJson } from '../server/http.js'
 import { cleanupDeckBlob, normalizeSubmission, saveApplication, SubmissionError } from '../server/notion.js'
 import { notifyApplicationSubmitted } from '../server/notifications/application-submitted.js'
 import { notifyFounderFollowUp } from '../server/notifications/founder-follow-up.js'
+import { syncApplicationToCrm } from '../server/crm-sync.js'
 
 async function bestEffortCleanup(url) {
   try {
@@ -30,9 +31,11 @@ export async function submissionsHandler(req, res) {
   try {
     const application = normalizeSubmission(body)
     const saved = await saveApplication(application)
+    // CRM card first, so the Telegram button can open it (falls back to the application page).
+    const crm = await syncApplicationToCrm(application, saved.page.url)
     await Promise.all([
       bestEffortCleanup(saved.deckBlobUrl),
-      notifyApplicationSubmitted(application, saved.page.url),
+      notifyApplicationSubmitted(application, saved.page.url, crm?.page?.url),
       notifyFounderFollowUp(application, { pageId: saved.page.id }),
     ])
     return sendJson(res, 201, { ok: true, pageId: saved.page.id })
